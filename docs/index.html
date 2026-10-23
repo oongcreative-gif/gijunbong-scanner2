@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>기준봉 스캐너</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+:root{
+  --paper:#edf0f4; --panel:#ffffff; --ink:#18202c; --sub:#667085; --rule:#d8dde5;
+  --up:#e0383e; --down:#2b6cde; --mark:#f08c00; --band:rgba(240,140,0,.12); --hover:#f4f6f9;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --paper:#0d1218; --panel:#141b24; --ink:#e6ebf2; --sub:#8a96a8; --rule:#232d3a;
+    --up:#ff6a70; --down:#6ea2ff; --mark:#ffa62b; --band:rgba(255,166,43,.13); --hover:#1a232e;
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font:15px/1.5 "Pretendard Variable", Pretendard, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  font-variant-numeric:tabular-nums;
+}
+.wrap{max-width:1120px; margin:0 auto; padding:0 16px}
+header{padding:22px 0 14px}
+.brand{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap}
+h1{margin:0; font-size:22px; font-weight:750; letter-spacing:-.02em}
+.rule-line{margin:2px 0 0; color:var(--sub); font-size:13px}
+.stamp{margin-left:auto; color:var(--sub); font-size:13px; text-align:right}
+.stamp b{color:var(--ink); font-weight:650}
+
+.stage{background:var(--panel); border:1px solid var(--rule)}
+.chartbox h2, .log h2{margin:0; font-size:14px; font-weight:700}
+.chartbox{min-width:0; padding:14px 16px 10px}
+.ch-head{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap}
+.ch-head h2{font-size:18px; letter-spacing:-.01em}
+.ch-meta{color:var(--sub); font-size:13px}
+#chartWrap{position:relative; margin-top:10px}
+#chart{height:420px}
+.view{margin-top:6px; color:var(--sub); font-size:12.5px}
+.ch-tools{display:flex; align-items:center; gap:8px; margin-top:8px; flex-wrap:wrap}
+.seg{display:inline-flex; border:1px solid var(--rule); border-radius:4px; overflow:hidden}
+.seg button{padding:5px 12px; border:0; background:transparent; color:var(--sub); font:inherit; font-size:13px; cursor:pointer}
+.seg button + button{border-left:1px solid var(--rule)}
+.seg button[aria-pressed="true"]{background:var(--mark); color:#fff; font-weight:650}
+.seg button:focus-visible{outline:2px solid var(--mark); outline-offset:-2px}
+.ch-tools small{color:var(--sub); font-size:12.5px}
+.key{display:flex; gap:16px; flex-wrap:wrap; color:var(--sub); font-size:12.5px; margin-top:6px}
+.key i{display:inline-block; width:14px; height:3px; margin-right:6px; vertical-align:middle}
+.key .sw{display:inline-block; width:14px; height:10px; margin-right:6px; vertical-align:middle; border:1px solid var(--rule)}
+
+.log{margin:18px 0 40px; background:var(--panel); border:1px solid var(--rule)}
+.log-head{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 16px; border-bottom:1px solid var(--rule)}
+.log input{
+  width:190px; max-width:50%; padding:7px 10px; border:1px solid var(--rule); border-radius:4px;
+  background:var(--paper); color:var(--ink); font:inherit; font-size:14px;
+}
+.log input:focus-visible{outline:2px solid var(--mark); outline-offset:1px}
+.scroll{overflow-x:auto}
+table{width:100%; border-collapse:collapse; min-width:640px}
+th, td{padding:10px 16px; text-align:left; border-bottom:1px solid var(--rule); font-size:14px; white-space:nowrap}
+th{color:var(--sub); font-weight:600; font-size:12.5px; background:var(--panel)}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:var(--hover)}
+tbody tr:last-child td{border-bottom:0}
+td.num, th.num{text-align:right}
+td small{display:block; color:var(--sub); font-size:12px}
+.up{color:var(--up)} .down{color:var(--down)}
+.tag{display:inline-block; padding:1px 8px; border-radius:3px; font-size:12px; border:1px solid var(--rule); color:var(--sub)}
+.tag.live{border-color:var(--mark); color:var(--mark)}
+
+@media (max-width:860px){
+  #chart{height:340px}
+  .stamp{margin-left:0; text-align:left; width:100%}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="brand">
+      <h1>기준봉 스캐너</h1>
+      <div class="stamp" id="stamp">불러오는 중</div>
+    </div>
+    <p class="rule-line">120일선이 60일선 위로 역전한 날부터 60일 동안, 양봉이면서 종가가 직전 60거래일 모든 봉(음봉 포함)보다 높은 첫 봉</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="stage" aria-label="기준봉 차트">
+    <div class="chartbox">
+      <div class="ch-head"><h2 id="chTitle">차트</h2><span class="ch-meta" id="chMeta"></span></div>
+      <div class="ch-tools">
+        <div class="seg" id="seg" role="group" aria-label="표시할 봉 수">
+          <button type="button" data-n="60" aria-pressed="true">60봉</button>
+          <button type="button" data-n="120" aria-pressed="false">120봉</button>
+          <button type="button" data-n="0" aria-pressed="false">전체</button>
+        </div>
+        <small>HTS처럼 60봉만 크게 보여줘요. 마우스 휠로 확대·축소, 끌어서 이동해요.</small>
+      </div>
+      <div id="chartWrap">
+        <div id="chart" role="img" aria-label="캔들 차트"></div>
+      </div>
+      <div class="view" id="view"></div>
+      <div class="key">
+        <span><i style="background:#f59e0b"></i>60일선</span>
+        <span><i style="background:#8b5cf6"></i>120일선</span>
+        <span><span class="sw" style="background:rgba(250,204,21,.35)"></span>정배열 (60선 위)</span>
+        <span><span class="sw" style="background:rgba(100,130,255,.22)"></span>역배열 60일 구간</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="log" aria-label="지난 기준봉">
+    <div class="log-head"><h2>지난 기준봉</h2><input id="q" type="search" placeholder="종목명 또는 코드" aria-label="종목 검색"></div>
+    <div class="scroll">
+      <table>
+        <thead><tr>
+          <th>포착일</th><th>종목</th><th class="num">종가</th><th class="num">등락률</th><th>역배열 시작</th><th>구간 끝</th><th>상태</th>
+        </tr></thead>
+        <tbody id="logBody"></tbody>
+      </table>
+    </div>
+    <p class="empty" id="logEmpty" hidden></p>
+  </section>
+</main>
+
+<script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+<script>
+(() => {
+  const nf = new Intl.NumberFormat('ko-KR');
+  const $ = (s) => document.querySelector(s);
+  const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const dark = () => matchMedia('(prefers-color-scheme: dark)').matches;
+  const getJSON = async (p) => {
+    const r = await fetch(p + '?t=' + Date.now());
+    if (!r.ok) throw new Error(p + ' ' + r.status);
+    return r.json();
+  };
+  const pct = (v) => (v >= 0 ? '+' : '') + v.toFixed(1) + '%';
+  const md = (iso) => iso ? iso.slice(5).replace('-', '/') : '';
+
+  let today = [], history = [], asof = null, activeKey = null;
+  let chart = null, candle = null, vol = null, m60 = null, m120 = null, band = null;
+  let cur = null;                  // 지금 보고 있는 차트 데이터
+  let span = 60;                   // 화면에 보여줄 봉 수 (0 = 전체)
+
+  const palette = () => dark()
+    ? {bg:'#141b24', text:'#8a96a8', grid:'#1f2833', up:'#ff6a70', down:'#6ea2ff', band:'rgba(110,140,255,0.20)', yel:'rgba(250,204,21,0.16)', mark:'#ffa62b'}
+    : {bg:'#ffffff', text:'#667085', grid:'#eef0f4', up:'#e0383e', down:'#2b6cde', band:'rgba(100,130,255,0.16)', yel:'rgba(250,204,21,0.30)', mark:'#f08c00'};
+
+  function ensureChart() {
+    if (chart) return;
+    const el = $('#chart'), p = palette();
+    chart = LightweightCharts.createChart(el, {
+      width: el.clientWidth, height: el.clientHeight,
+      layout: {background: {type: 'solid', color: p.bg}, textColor: p.text, fontFamily: 'inherit'},
+      grid: {vertLines: {color: p.grid}, horzLines: {color: p.grid}},
+      rightPriceScale: {borderColor: p.grid},
+      timeScale: {borderColor: p.grid, timeVisible: false},
+      crosshair: {mode: 0},
+    });
+    band = chart.addHistogramSeries({priceScaleId: 'band', priceLineVisible: false, lastValueVisible: false});
+    chart.priceScale('band').applyOptions({scaleMargins: {top: 0, bottom: 0}, visible: false});
+    candle = chart.addCandlestickSeries({
+      upColor: p.up, downColor: p.down, borderUpColor: p.up, borderDownColor: p.down,
+      wickUpColor: p.up, wickDownColor: p.down,
+    });
+    candle.priceScale().applyOptions({scaleMargins: {top: 0.08, bottom: 0.25}});
+    vol = chart.addHistogramSeries({priceFormat: {type: 'volume'}, priceScaleId: 'vol', priceLineVisible: false, lastValueVisible: false});
+    chart.priceScale('vol').applyOptions({scaleMargins: {top: 0.82, bottom: 0}});
+    m60 = chart.addLineSeries({color: '#f59e0b', lineWidth: 2, priceLineVisible: false, lastValueVisible: false});
+    m120 = chart.addLineSeries({color: '#8b5cf6', lineWidth: 2, priceLineVisible: false, lastValueVisible: false});
+    new ResizeObserver(() => chart.applyOptions({width: el.clientWidth, height: el.clientHeight})).observe(el);
+    chart.timeScale().subscribeVisibleLogicalRangeChange(onRange);
+  }
+
+  const dayDiff = (a, b) => Math.round((Date.parse(a) - Date.parse(b)) / 86400000);
+
+  function onRange(r) {
+    const v = $('#view');
+    if (!cur || !r) { v.textContent = ''; return; }
+    const n = cur.t.length;
+    const from = Math.max(0, Math.ceil(r.from)), to = Math.min(n - 1, Math.floor(r.to));
+    if (to < from) { v.textContent = ''; return; }
+    const days = dayDiff(cur.t[to], cur.t[from]) + 1;
+    v.textContent = `화면에 ${to - from + 1}봉 (${cur.t[from]} ~ ${cur.t[to]}, 달력 ${days}일)`;
+  }
+
+  async function showChart(s) {
+    ensureChart();
+    $('#chTitle').textContent = `${s.name} ${s.code}`;
+    $('#chMeta').textContent = `${s.market} · 기준봉 ${s.signal_date} · 역배열 ${s.cross_date} 시작, ${s.day_no}일째`;
+    let d;
+    try { d = await getJSON('data/' + s.chart); }
+    catch (e) { $('#chMeta').textContent = '차트 데이터를 불러오지 못했어요. 잠시 뒤 다시 눌러 주세요.'; return; }
+    cur = d;
+    const p = palette();
+    const bars = d.t.map((t, i) => ({time: t, open: d.o[i], high: d.h[i], low: d.l[i], close: d.c[i]}));
+    candle.setData(bars);
+    vol.setData(d.t.map((t, i) => ({time: t, value: d.v[i], color: d.c[i] >= d.o[i] ? p.up + '66' : p.down + '66'})));
+    const line = (arr) => d.t.map((t, i) => arr[i] == null ? null : {time: t, value: arr[i]}).filter(Boolean);
+    m60.setData(line(d.ma60));
+    m120.setData(line(d.ma120));
+    // 배경: 정배열(60선이 120선 위)은 노란색, 역배열 60일 구간은 파란 기운 (HTS 차트와 같은 방식)
+    const bg = [];
+    d.t.forEach((t, i) => {
+      if (d.ma60[i] != null && d.ma120[i] != null && d.ma60[i] >= d.ma120[i]) bg.push({time: t, value: 1, color: p.yel});
+      else if (t >= d.cross_date && t <= d.window_end) bg.push({time: t, value: 1, color: p.band});
+    });
+    band.setData(bg);
+    const marks = [];
+    if (d.cross_date >= d.t[0]) marks.push({time: d.cross_date, position: 'aboveBar', color: p.down, shape: 'arrowDown', text: '역전'});
+    marks.push({time: d.signal_date, position: 'belowBar', color: p.up, shape: 'arrowUp', text: '기준봉'});
+    marks.sort((a, b) => (a.time < b.time ? -1 : a.time > b.time ? 1 : 0));
+    candle.setMarkers(marks);
+    applyRange();
+  }
+
+  // 기준봉이 오른쪽에 오도록 span봉만 크게 보여줌 (오늘 신호는 맨 오른쪽 = 오늘)
+  function applyRange() {
+    if (!chart || !cur) return;
+    const n = cur.t.length;
+    if (!span || span >= n) { chart.timeScale().fitContent(); return; }
+    const si = Math.max(0, cur.t.indexOf(cur.signal_date));
+    const last = Math.min(n - 1, si + 10);          // 오른쪽 끝 봉 (기준봉 뒤로 10봉까지)
+    const first = Math.max(0, last - span + 1);     // 딱 span봉이 보이게
+    chart.timeScale().setVisibleLogicalRange({from: first - 0.5, to: last + 0.5});
+  }
+
+  function select(key, s) {
+    activeKey = key;
+    showChart(s);
+  }
+
+  function renderLog() {
+    const q = $('#q').value.trim().toLowerCase();
+    const rows = history.filter((h) => !q || h.name.toLowerCase().includes(q) || h.code.includes(q)).slice(0, 300);
+    $('#logBody').innerHTML = rows.map((h) => {
+      const live = asof && h.window_end >= asof;
+      return `<tr data-code="${esc(h.code)}" data-date="${esc(h.signal_date)}">
+        <td>${esc(h.signal_date)}</td>
+        <td><b>${esc(h.name)}</b><small>${esc(h.code)} · ${esc(h.market)}</small></td>
+        <td class="num">${nf.format(h.close)}</td>
+        <td class="num ${h.change_pct >= 0 ? 'up' : 'down'}">${pct(h.change_pct)}</td>
+        <td>${esc(h.cross_date)}</td>
+        <td>${esc(h.window_end)}</td>
+        <td><span class="tag ${live ? 'live' : ''}">${live ? '진행 중' : '확정'}</span></td>
+      </tr>`;
+    }).join('');
+    const empty = $('#logEmpty');
+    empty.hidden = rows.length > 0;
+    empty.textContent = history.length ? '검색 결과가 없어요.' : '아직 기록이 없어요. 신호가 잡히면 여기에 쌓여요.';
+    $('#logBody').querySelectorAll('tr').forEach((tr, i) => tr.addEventListener('click', () => {
+      select('h:' + tr.dataset.code + tr.dataset.date, rows[i]);
+      window.scrollTo({top: 0, behavior: 'smooth'});
+    }));
+  }
+
+  function wireSeg() {
+    document.querySelectorAll('#seg button').forEach((b) => b.addEventListener('click', () => {
+      span = +b.dataset.n;
+      document.querySelectorAll('#seg button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      applyRange();
+    }));
+  }
+
+  async function init() {
+    wireSeg();
+    let latest = {signals: [], asof: null};
+    try { latest = await getJSON('data/latest.json'); } catch (e) { /* 아래 안내 문구로 처리 */ }
+    try { history = await getJSON('data/history.json'); } catch (e) { history = []; }
+    asof = latest.asof;
+    today = latest.signals || [];
+    $('#stamp').innerHTML = asof
+      ? `<b>${esc(asof)}</b> 장 마감 기준 · 스캔 ${nf.format(latest.universe_size || 0)}종목 · 갱신 ${esc((latest.updated_at || '').slice(0, 16).replace('T', ' '))}`
+      : '스캔 기록 없음';
+    renderLog();
+    $('#q').addEventListener('input', renderLog);
+    if (today.length) select('t:' + today[0].code, today[0]);
+    else if (history.length) select('h:' + history[0].code + history[0].signal_date, history[0]);
+    else ensureChart();
+  }
+  init();
+})();
+</script>
+</body>
+</html>
