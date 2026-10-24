@@ -37,6 +37,9 @@ CHART_DIR = os.path.join(DATA_DIR, 'charts')
 LATEST_JSON = os.path.join(DATA_DIR, 'latest.json')
 HISTORY_JSON = os.path.join(DATA_DIR, 'history.json')
 UNIVERSE_CSV = os.path.join(ROOT, 'data', 'universe.csv')
+INDEX_JSON = os.path.join(DATA_DIR, 'index.json')
+INDEX_SYMBOLS = {'KOSPI': 'KS11', 'KOSDAQ': 'KQ11'}   # 사이트에서 같이 보여줄 지수
+INDEX_BARS = 330
 
 KST = ZoneInfo('Asia/Seoul')
 MA_SHORT, MA_LONG = 60, 120
@@ -267,6 +270,67 @@ def build_messages(signals, asof):
     return msgs
 
 
+# --------------------------------------------------------------------------- 지수 (코스피/코스닥)
+def save_index_data():
+    """코스피/코스닥 지수 일봉을 docs/data/index.json 에 저장하고 돌려줍니다.
+    하나가 실패해도 스캔은 계속하고, 실패한 지수는 예전에 저장한 값을 그대로 둡니다."""
+    out = load_json(INDEX_JSON, {})
+    start = (datetime.now(KST) - timedelta(days=560)).strftime('%Y-%m-%d')
+    for name, sym in INDEX_SYMBOLS.items():
+        try:
+            df = fdr.DataReader(sym, start)
+            df = df.dropna(subset=['High', 'Low', 'Close'])
+            df = df[df['Close'] > 0].tail(INDEX_BARS).copy()
+            if len(df) < 60:
+                raise RuntimeError(f'지수 봉이 {len(df)}개뿐')
+            if 'Open' not in df.columns:
+                df['Open'] = df['Close'].shift(1)
+            df['Open'] = df['Open'].where(df['Open'] > 0, df['Close'].shift(1)).fillna(df['Close'])
+            out[name] = {'t': [d.date().isoformat() for d in df.index],
+                         'o': [round(float(x), 2) for x in df['Open']], 'h': [round(float(x), 2) for x in df['High']],
+                         'l': [round(float(x), 2) for x in df['Low']], 'c': [round(float(x), 2) for x in df['Close']]}
+        except Exception as e:                              # noqa: BLE001
+            print(f'{name} 지수 조회 실패(예전 값 유지): {e!r}')
+    if out:
+        save_json(INDEX_JSON, out)
+    return out
+
+
+def judge_vs_index(stock, idx, date):
+    """기준봉 날 지수와 비교: 종목은 양봉으로 전날 고점을 넘었는데 지수는 못 넘으면 '강함'.
+    둘 다 넘으면 '보통', 종목이 전날 고점을 못 넘으면 '약함'. 날짜가 없으면 None"""
+    try:
+        i, j = stock['t'].index(date), idx['t'].index(date)
+    except ValueError:
+        return None
+    if i < 1 or j < 1:
+        return None
+    s_break = stock['c'][i] > stock['o'][i] and stock['h'][i] > stock['h'][i - 1]
+    i_break = idx['h'][j] > idx['h'][j - 1]
+    verdict = '약함' if not s_break else ('보통' if i_break else '강함')
+    return {'v': verdict, 'idx_pct': round((idx['c'][j] / idx['c'][j - 1] - 1) * 100, 2)}
+
+
+def annotate_vs_index(history, index_data):
+    """기록에 '지수 대비' 판정을 붙입니다 (이미 붙은 건 건너뜀)"""
+    done = 0
+    for h in history:
+        if h.get('vs') or not index_data:
+            continue
+        chart = load_json(os.path.join(DATA_DIR, h.get('chart', '')), None) if h.get('chart') else None
+        if not chart:
+            continue
+        vs = {}
+        for name, idx in index_data.items():
+            r = judge_vs_index(chart, idx, h['signal_date'])
+            if r:
+                vs[name] = r
+        if vs:
+            h['vs'] = vs
+            done += 1
+    return done
+
+
 # --------------------------------------------------------------------------- main
 def main():
     now = datetime.now(KST)
@@ -304,6 +368,7 @@ def main():
         'signals': signals,
     }, indent=1)
 
+    index_data = save_index_data()
     if dry:
         print('DRY_RUN: 기록 저장과 알림은 건너뜁니다')
         return 0
@@ -317,6 +382,7 @@ def main():
 
     history, dropped = prune_superseded(history)       # 같은 구간의 앞선 신호는 새 신호에 밀려남
     remove_charts(dropped)
+    print(f'지수 대비 판정 {annotate_vs_index(history, index_data)}건 추가')
 
     # 오늘 신호 중 아직 알리지 않은 것만 알림 (실패하면 다음 실행 때 다시 시도)
     pending = [h for h in history if not h.get('notified') and h['signal_date'] == asof.isoformat()]

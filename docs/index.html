@@ -39,6 +39,14 @@ h1{margin:0; font-size:22px; font-weight:750; letter-spacing:-.02em}
 .ch-meta{color:var(--sub); font-size:13px}
 #chartWrap{position:relative; margin-top:10px}
 #chart{height:420px}
+#idxBox{position:relative; margin-top:10px}
+#idxChart{height:150px}
+#idxLabel{position:absolute; left:10px; top:6px; z-index:3; font-size:12.5px; font-weight:650; color:var(--sub); pointer-events:none}
+#idxBox[hidden]{display:none}
+.vs{display:inline-block; padding:1px 8px; border-radius:3px; font-size:12px; border:1px solid var(--rule); color:var(--sub)}
+.vs.strong{border-color:var(--up); color:var(--up); font-weight:650}
+.vs.weak{border-color:var(--down); color:var(--down)}
+
 .view{margin-top:6px; color:var(--sub); font-size:12.5px}
 .ch-tools{display:flex; align-items:center; gap:8px; margin-top:8px; flex-wrap:wrap}
 .seg{display:inline-flex; border:1px solid var(--rule); border-radius:4px; overflow:hidden}
@@ -73,6 +81,7 @@ td small{display:block; color:var(--sub); font-size:12px}
 
 @media (max-width:860px){
   #chart{height:340px}
+  #idxChart{height:120px}
   .stamp{margin-left:0; text-align:left; width:100%}
 }
 </style>
@@ -84,7 +93,7 @@ td small{display:block; color:var(--sub); font-size:12px}
       <h1>기준봉 스캐너</h1>
       <div class="stamp" id="stamp">불러오는 중</div>
     </div>
-    <p class="rule-line">120일선이 60일선 위로 역전한 날부터 60일 동안, 양봉이면서 종가가 직전 60거래일 모든 봉(음봉 포함)보다 높은 첫 봉</p>
+    <p class="rule-line">120일선이 60일선 위로 역전한 날부터 60일 동안, 양봉이면서 종가가 직전 60거래일 모든 봉(음봉 포함)보다 높은 첫 봉. 지수 대비는 기준봉 날 종목이 양봉으로 전날 고점을 넘고 지수는 못 넘었으면 '강함'</p>
   </div>
 </header>
 
@@ -98,8 +107,14 @@ td small{display:block; color:var(--sub); font-size:12px}
           <button type="button" data-n="120" aria-pressed="false">120봉</button>
           <button type="button" data-n="0" aria-pressed="false">전체</button>
         </div>
+        <div class="seg" id="idxSeg" role="group" aria-label="같이 볼 지수">
+          <button type="button" data-i="auto" aria-pressed="true">지수 자동</button>
+          <button type="button" data-i="KOSPI" aria-pressed="false">코스피</button>
+          <button type="button" data-i="KOSDAQ" aria-pressed="false">코스닥</button>
+        </div>
         <small>HTS처럼 60봉만 크게 보여줘요. 마우스 휠로 확대·축소, 끌어서 이동해요.</small>
       </div>
+      <div id="idxBox" hidden><span id="idxLabel"></span><div id="idxChart" role="img" aria-label="지수 차트"></div></div>
       <div id="chartWrap">
         <div id="chart" role="img" aria-label="캔들 차트"></div>
       </div>
@@ -118,7 +133,7 @@ td small{display:block; color:var(--sub); font-size:12px}
     <div class="scroll">
       <table>
         <thead><tr>
-          <th>포착일</th><th>종목</th><th class="num">종가</th><th class="num">등락률</th><th>역배열 시작</th><th>구간 끝</th><th>상태</th>
+          <th>포착일</th><th>종목</th><th class="num">종가</th><th class="num">등락률</th><th>지수 대비</th><th>역배열 시작</th><th>구간 끝</th><th>상태</th>
         </tr></thead>
         <tbody id="logBody"></tbody>
       </table>
@@ -145,6 +160,7 @@ td small{display:block; color:var(--sub); font-size:12px}
   let today = [], history = [], asof = null, activeKey = null;
   let chart = null, candle = null, vol = null, m60 = null, m120 = null, band = null;
   let cur = null;                  // 지금 보고 있는 차트 데이터
+  let indexData = {}, idxPick = 'auto', idxChart = null, idxCandle = null, curStock = null, syncing = false;
   let span = 60;                   // 화면에 보여줄 봉 수 (0 = 전체)
 
   const palette = () => dark()
@@ -158,7 +174,7 @@ td small{display:block; color:var(--sub); font-size:12px}
       width: el.clientWidth, height: el.clientHeight,
       layout: {background: {type: 'solid', color: p.bg}, textColor: p.text, fontFamily: 'inherit'},
       grid: {vertLines: {color: p.grid}, horzLines: {color: p.grid}},
-      rightPriceScale: {borderColor: p.grid},
+      rightPriceScale: {borderColor: p.grid, minimumWidth: 64},
       timeScale: {borderColor: p.grid, timeVisible: false},
       crosshair: {mode: 0},
     });
@@ -175,6 +191,57 @@ td small{display:block; color:var(--sub); font-size:12px}
     m120 = chart.addLineSeries({color: '#8b5cf6', lineWidth: 2, priceLineVisible: false, lastValueVisible: false});
     new ResizeObserver(() => chart.applyOptions({width: el.clientWidth, height: el.clientHeight})).observe(el);
     chart.timeScale().subscribeVisibleLogicalRangeChange(onRange);
+    chart.timeScale().subscribeVisibleTimeRangeChange(syncIdx);
+  }
+
+  const idxName = (s) => (idxPick === 'auto' ? (s.market === 'KOSDAQ' ? 'KOSDAQ' : 'KOSPI') : idxPick);
+  const idxKo = (n) => (n === 'KOSDAQ' ? '코스닥' : '코스피');
+  const vsOf = (s) => (s.vs || {})[idxName(s)] || null;
+  const vsTag = (v) => (v ? `<span class="vs ${v.v === '강함' ? 'strong' : v.v === '약함' ? 'weak' : ''}" title="종목: 양봉으로 전날 고점 돌파 / 지수: 전날 고점 돌파 여부">${v.v}</span>` : '<span class="vs">-</span>');
+
+  function ensureIdxChart() {
+    if (idxChart) return;
+    const el = $('#idxChart'), p = palette();
+    idxChart = LightweightCharts.createChart(el, {
+      width: el.clientWidth, height: el.clientHeight,
+      layout: {background: {type: 'solid', color: p.bg}, textColor: p.text, fontFamily: 'inherit'},
+      grid: {vertLines: {color: p.grid}, horzLines: {color: p.grid}},
+      rightPriceScale: {borderColor: p.grid, minimumWidth: 64},
+      timeScale: {borderColor: p.grid, timeVisible: false, visible: false},
+      crosshair: {mode: 0},
+      handleScroll: false, handleScale: false,       // 움직임은 아래 종목 차트를 따라가요
+    });
+    idxCandle = idxChart.addCandlestickSeries({
+      upColor: p.up, downColor: p.down, borderUpColor: p.up, borderDownColor: p.down,
+      wickUpColor: p.up, wickDownColor: p.down, priceFormat: {type: 'price', precision: 2, minMove: 0.01},
+    });
+    new ResizeObserver(() => idxChart.applyOptions({width: el.clientWidth, height: el.clientHeight})).observe(el);
+  }
+
+  function syncIdx() {
+    if (!chart || !idxChart || syncing) return;
+    const r = chart.timeScale().getVisibleRange();
+    if (!r) return;
+    syncing = true;
+    try { idxChart.timeScale().setVisibleRange(r); } catch (e) { /* 지수 데이터가 없는 구간 */ }
+    syncing = false;
+  }
+
+  function showIndex(s) {
+    const name = idxName(s), idx = indexData[name], box = $('#idxBox');
+    if (!idx || !cur) { box.hidden = true; return; }
+    box.hidden = false;
+    ensureIdxChart();
+    idxChart.applyOptions({width: $('#idxChart').clientWidth, height: $('#idxChart').clientHeight});
+    const first = cur.t[0];
+    const bars = [];
+    idx.t.forEach((t, i) => { if (t >= first) bars.push({time: t, open: idx.o[i], high: idx.h[i], low: idx.l[i], close: idx.c[i]}); });
+    idxCandle.setData(bars);
+    const p = palette();
+    idxCandle.setMarkers(bars.some((b) => b.time === s.signal_date) ? [{time: s.signal_date, position: 'belowBar', color: p.mark, shape: 'arrowUp', text: ''}] : []);
+    const v = vsOf(s);
+    $('#idxLabel').textContent = `${idxKo(name)}${v ? ` · 기준봉 날 ${v.idx_pct >= 0 ? '+' : ''}${v.idx_pct.toFixed(2)}% · 종목은 지수보다 ${v.v}` : ''}`;
+    syncIdx();
   }
 
   const dayDiff = (a, b) => Math.round((Date.parse(a) - Date.parse(b)) / 86400000);
@@ -192,7 +259,9 @@ td small{display:block; color:var(--sub); font-size:12px}
   async function showChart(s) {
     ensureChart();
     $('#chTitle').textContent = `${s.name} ${s.code}`;
-    $('#chMeta').textContent = `${s.market} · 기준봉 ${s.signal_date} · 역배열 ${s.cross_date} 시작, ${s.day_no}일째`;
+    curStock = s;
+    const v0 = vsOf(s);
+    $('#chMeta').textContent = `${s.market} · 기준봉 ${s.signal_date} · 역배열 ${s.cross_date} 시작, ${s.day_no}일째${v0 ? ` · 지수보다 ${v0.v}` : ''}`;
     let d;
     try { d = await getJSON('data/' + s.chart); }
     catch (e) { $('#chMeta').textContent = '차트 데이터를 불러오지 못했어요. 잠시 뒤 다시 눌러 주세요.'; return; }
@@ -216,6 +285,7 @@ td small{display:block; color:var(--sub); font-size:12px}
     marks.push({time: d.signal_date, position: 'belowBar', color: p.up, shape: 'arrowUp', text: '기준봉'});
     marks.sort((a, b) => (a.time < b.time ? -1 : a.time > b.time ? 1 : 0));
     candle.setMarkers(marks);
+    showIndex(s);
     applyRange();
   }
 
@@ -228,10 +298,15 @@ td small{display:block; color:var(--sub); font-size:12px}
     const last = Math.min(n - 1, si + 10);          // 오른쪽 끝 봉 (기준봉 뒤로 10봉까지)
     const first = Math.max(0, last - span + 1);     // 딱 span봉이 보이게
     chart.timeScale().setVisibleLogicalRange({from: first - 0.5, to: last + 0.5});
+    syncIdx();
   }
 
   function select(key, s) {
     activeKey = key;
+    if (!s.vs) {                       // 오늘 신호(latest.json)에는 지수 대비가 없어서 기록에서 찾아 붙임
+      const m = history.find((x) => x.code === s.code && x.signal_date === s.signal_date);
+      if (m && m.vs) s = {...s, vs: m.vs};
+    }
     showChart(s);
   }
 
@@ -245,6 +320,7 @@ td small{display:block; color:var(--sub); font-size:12px}
         <td><b>${esc(h.name)}</b><small>${esc(h.code)} · ${esc(h.market)}</small></td>
         <td class="num">${nf.format(h.close)}</td>
         <td class="num ${h.change_pct >= 0 ? 'up' : 'down'}">${pct(h.change_pct)}</td>
+        <td>${vsTag(vsOf(h))}</td>
         <td>${esc(h.cross_date)}</td>
         <td>${esc(h.window_end)}</td>
         <td><span class="tag ${live ? 'live' : ''}">${live ? '진행 중' : '확정'}</span></td>
@@ -267,8 +343,19 @@ td small{display:block; color:var(--sub); font-size:12px}
     }));
   }
 
+  function wireIdxSeg() {
+    document.querySelectorAll('#idxSeg button').forEach((b) => b.addEventListener('click', () => {
+      idxPick = b.dataset.i;
+      document.querySelectorAll('#idxSeg button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      renderLog();
+      if (curStock && cur) { showIndex(curStock); $('#chMeta').textContent = $('#chMeta').textContent.replace(/ · 지수보다 .*$/, '') + (vsOf(curStock) ? ` · 지수보다 ${vsOf(curStock).v}` : ''); }
+    }));
+  }
+
   async function init() {
     wireSeg();
+    wireIdxSeg();
+    try { indexData = await getJSON('data/index.json'); } catch (e) { indexData = {}; }
     let latest = {signals: [], asof: null};
     try { latest = await getJSON('data/latest.json'); } catch (e) { /* 아래 안내 문구로 처리 */ }
     try { history = await getJSON('data/history.json'); } catch (e) { history = []; }
