@@ -1,0 +1,63 @@
+name: scan
+
+on:
+  schedule:
+    # UTC 11:10 = 한국시간 20:10, 월~금 (넥스트레이드 애프터마켓 20:00 마감 후, 통합 시세가 확정된 뒤)
+    - cron: '10 11 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: '휴장일/장 마감 전에도 강제 실행하려면 1'
+        required: false
+        default: ''
+        type: string
+      dry_run:
+        description: '텔레그램 전송과 기록 저장 없이 결과만 확인하려면 1'
+        required: false
+        default: ''
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: scan
+  cancel-in-progress: false
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install
+        run: pip install -r requirements.txt
+
+      - name: Scan
+        run: python scan.py
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          SITE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
+          FORCE: ${{ github.event.inputs.force }}
+          DRY_RUN: ${{ github.event.inputs.dry_run }}
+
+      - name: Commit results
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "변경 없음"
+          else
+            git commit -m "scan $(TZ=Asia/Seoul date +%F)"
+            git pull --rebase origin "${GITHUB_REF_NAME}" || true
+            git push
+          fi
