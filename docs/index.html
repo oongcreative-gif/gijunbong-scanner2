@@ -69,7 +69,7 @@ h1{margin:0; font-size:22px; font-weight:750; letter-spacing:-.02em}
 .log input:focus-visible{outline:2px solid var(--mark); outline-offset:1px}
 .scroll{flex:1; min-height:0; overflow:auto}
 table{width:100%; border-collapse:collapse}
-th, td{padding:8px 10px; text-align:left; border-bottom:1px solid var(--rule); font-size:14px; white-space:nowrap}
+th, td{padding:8px 8px; text-align:left; border-bottom:1px solid var(--rule); font-size:14px; white-space:nowrap}
 th{color:var(--sub); font-weight:600; font-size:12.5px; background:var(--panel); position:sticky; top:0; z-index:1; box-shadow:0 1px 0 var(--rule)}
 tbody tr{cursor:pointer}
 tbody tr:hover{background:var(--hover)}
@@ -135,7 +135,7 @@ td small{display:block; color:var(--sub); font-size:12px}
     <div class="scroll">
       <table>
         <thead><tr>
-          <th>포착일</th><th>종목</th><th class="num">등락률</th><th>지수 대비</th><th>상태</th>
+          <th>포착일</th><th>종목</th><th class="num">등락률</th><th>지수 대비</th>
         </tr></thead>
         <tbody id="logBody"></tbody>
       </table>
@@ -269,9 +269,10 @@ td small{display:block; color:var(--sub); font-size:12px}
     catch (e) { $('#chMeta').textContent = '차트 데이터를 불러오지 못했어요. 잠시 뒤 다시 눌러 주세요.'; return; }
     cur = d;
     const p = palette();
-    const bars = d.t.map((t, i) => ({time: t, open: d.o[i], high: d.h[i], low: d.l[i], close: d.c[i]}));
+    const ok = (i) => d.o[i] > 0 && d.h[i] > 0 && d.l[i] > 0 && d.c[i] > 0;      // 거래정지 등으로 값이 0인 봉은 제외
+    const bars = d.t.map((t, i) => (ok(i) ? {time: t, open: d.o[i], high: d.h[i], low: d.l[i], close: d.c[i]} : null)).filter(Boolean);
     candle.setData(bars);
-    vol.setData(d.t.map((t, i) => ({time: t, value: d.v[i], color: d.c[i] >= d.o[i] ? p.up + '66' : p.down + '66'})));
+    vol.setData(d.t.map((t, i) => (ok(i) ? {time: t, value: d.v[i], color: d.c[i] >= d.o[i] ? p.up + '66' : p.down + '66'} : null)).filter(Boolean));
     const line = (arr) => d.t.map((t, i) => arr[i] == null ? null : {time: t, value: arr[i]}).filter(Boolean);
     m60.setData(line(d.ma60));
     m120.setData(line(d.ma120));
@@ -319,10 +320,9 @@ td small{display:block; color:var(--sub); font-size:12px}
       const live = asof && h.window_end >= asof;
       return `<tr data-code="${esc(h.code)}" data-date="${esc(h.signal_date)}">
         <td>${esc(h.signal_date.slice(5))}<small>${esc(h.signal_date.slice(0, 4))}</small></td>
-        <td><b>${esc(h.name)}</b><small>${esc(h.code)} · ${esc(h.market)} · 종가 ${nf.format(h.close)}</small><small>역배열 ${esc(md(h.cross_date))} ~ ${esc(md(h.window_end))}</small></td>
+        <td><b>${esc(h.name)}</b>${live ? ' <span class="tag live">진행 중</span>' : ''}<small>${esc(h.code)} · ${esc(h.market)} · 종가 ${nf.format(h.close)}</small><small>역배열 ${esc(md(h.cross_date))} ~ ${esc(md(h.window_end))}</small></td>
         <td class="num ${h.change_pct >= 0 ? 'up' : 'down'}">${pct(h.change_pct)}</td>
         <td>${vsTag(vsOf(h))}</td>
-        <td><span class="tag ${live ? 'live' : ''}">${live ? '진행 중' : '확정'}</span></td>
       </tr>`;
     }).join('');
     const empty = $('#logEmpty');
