@@ -21,7 +21,7 @@ def stock_history(code, start, d_from, d_to):
     last_err = None
     for attempt in range(3):
         try:
-            raw = scan.fdr.DataReader(code, start)
+            raw = scan.load_daily(code, start)
             if raw is None or raw.empty:
                 return 'none', []
             df = scan.prepare(raw)

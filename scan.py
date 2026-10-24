@@ -1,5 +1,7 @@
 """기준봉(단기) 스캐너 - GitHub Actions용
 
+가격은 HTS 통합 시세와 같게 KRX 일봉에 넥스트레이드(NXT) 일봉을 합친 값(시가=NXT, 종가=NXT, 고저=극값, 거래량=합)이다. NXT_OFF=1 이면 KRX만.
+
 규칙
 1. 60일선이 120일선 아래로 내려간 첫 날 = 역배열 시작일 (1일째)
 2. 시작일부터 60일(달력일) 동안, 역배열이 유지되는 구간에서
@@ -51,6 +53,115 @@ MIN_MARCAP = 50_000_000_000   # 시총 500억 이상
 MIN_AMOUNT = 1_000_000_000    # 당일 거래대금 10억 이상
 MAX_WORKERS = 8
 MAX_ERROR_RATIO = 0.2     # 조회 실패가 이 비율을 넘으면 결과를 저장하지 않고 실패 처리
+
+
+# --------------------------------------------------------------------------- 통합(KRX+NXT) 일봉
+# HTS 의 통합 시세와 맞추기 위해 FinanceDataReader(KRX 정규장)에 넥스트레이드(NXT) 일봉을 합친다.
+#   시가 = NXT 시가(프리마켓이 먼저 열려서), 종가 = NXT 종가(애프터마켓이 마지막), 고가 = 둘 중 높은 값,
+#   저가 = 둘 중 낮은 값, 거래량 = KRX + NXT.   (NXT 거래가 없는 날은 KRX 값 그대로)
+NXT_URL = 'https://m.stock.naver.com/front-api/chart/domesticPriceByTime/marketInfo'
+NXT_FIRST_DAY = date(2025, 3, 4)       # 넥스트레이드 개장일
+NXT_CHUNK_DAYS = 250
+NXT_MAX_GAP = 0.35                     # NXT 종가가 KRX 종가와 35% 넘게 다르면(수정주가 차이 등) 그날은 합치지 않음
+NXT_USE = os.environ.get('NXT_OFF') != '1'
+NXT_STATS = {'merged': 0, 'none': 0, 'fail': 0}
+_HTTP_HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
+                               'Chrome/124.0 Safari/537.36', 'Referer': 'https://m.stock.naver.com/'}
+
+
+def _num(v):
+    try:
+        return float(str(v).replace(',', ''))
+    except (TypeError, ValueError):
+        return None
+
+
+def _walk_rows(obj, out):
+    if isinstance(obj, dict):
+        if 'localDate' in obj:
+            out.append(obj)
+        else:
+            for v in obj.values():
+                _walk_rows(v, out)
+    elif isinstance(obj, list):
+        for v in obj:
+            _walk_rows(v, out)
+
+
+def fetch_nxt(code, d_from, d_to):
+    """NXT 일봉 -> {date: (open, high, low, close, volume)}. 실패하면 예외."""
+    out = {}
+    cur = max(d_from, NXT_FIRST_DAY)
+    while cur <= d_to:
+        end = min(cur + timedelta(days=NXT_CHUNK_DAYS - 1), d_to)
+        params = {'reutersCode': code, 'chartInfoType': 'item', 'timeFrame': 'day', 'exchangeType': 'NXT',
+                  'startDateTime': cur.strftime('%Y%m%d') + '000000', 'endDateTime': end.strftime('%Y%m%d') + '235959'}
+        r = requests.get(NXT_URL, params=params, headers=_HTTP_HEADERS, timeout=20)
+        r.raise_for_status()
+        rows = []
+        _walk_rows(r.json(), rows)
+        for row in rows:
+            ld = str(row.get('localDate', ''))
+            if len(ld) != 8:
+                continue
+            o, h, l, c = (_num(row.get(k)) for k in ('openPrice', 'highPrice', 'lowPrice', 'closePrice'))
+            v = _num(row.get('accumulatedTradingVolume'))
+            if None in (o, h, l, c, v) or v <= 0 or min(o, h, l, c) <= 0:
+                continue
+            out[date(int(ld[:4]), int(ld[4:6]), int(ld[6:]))] = (o, h, l, c, v)
+        cur = end + timedelta(days=1)
+    return out
+
+
+def merge_nxt(raw, code):
+    """KRX 일봉(raw)에 NXT 일봉을 합쳐 통합 일봉을 돌려준다. NXT 조회가 실패하면 KRX 그대로."""
+    if not NXT_USE or raw is None or raw.empty:
+        return raw
+    d_from, d_to = raw.index[0].date(), raw.index[-1].date()
+    if d_to < NXT_FIRST_DAY:
+        return raw
+    last_err = None
+    for attempt in range(2):
+        try:
+            nxt = fetch_nxt(code, d_from, d_to)
+            break
+        except Exception as e:                      # noqa: BLE001
+            last_err = e
+            time.sleep(0.5 * (attempt + 1))
+    else:
+        NXT_STATS['fail'] += 1
+        return raw
+    if not nxt:
+        NXT_STATS['none'] += 1
+        return raw
+    df = raw.copy()
+    changed = False
+    for ts in df.index:
+        row = nxt.get(ts.date())
+        if not row:
+            continue
+        o, h, l, c, v = row
+        kc = float(df.at[ts, 'Close'])
+        if kc > 0 and abs(c / kc - 1) > NXT_MAX_GAP:
+            continue
+        df.at[ts, 'Open'] = o
+        df.at[ts, 'High'] = max(float(df.at[ts, 'High']), h)
+        df.at[ts, 'Low'] = min(float(df.at[ts, 'Low']), l)
+        df.at[ts, 'Close'] = c
+        df.at[ts, 'Volume'] = float(df.at[ts, 'Volume']) + v
+        changed = True
+    if changed:
+        NXT_STATS['merged'] += 1
+        if 'Change' in df.columns:
+            df['Change'] = df['Close'].pct_change()
+    else:
+        NXT_STATS['none'] += 1
+    return df
+
+
+def load_daily(code, start):
+    """통합(KRX+NXT) 일봉. scan / backfill / diagnose 가 같이 쓴다."""
+    return merge_nxt(fdr.DataReader(code, start), code)
 
 
 # --------------------------------------------------------------------------- 판별 로직
@@ -154,7 +265,7 @@ def scan_one(code, start, asof):
     last_err = None
     for attempt in range(3):
         try:
-            raw = fdr.DataReader(code, start)
+            raw = load_daily(code, start)
             if raw is None or raw.empty:
                 return 'none', None
             if raw.index[-1].date() != asof:               # 오늘 봉이 없는 종목(거래정지 등)
@@ -345,11 +456,14 @@ def main():
         if now.hour < 16:
             print('장 마감 후 데이터가 확정되기 전(16시 이전)이라 종료합니다.')
             return 0
+    if now.hour < 20 and not dry:
+        print('참고: 넥스트레이드 애프터마켓은 20:00 에 끝나요. 그 전에 돌리면 오늘 통합 종가·거래량이 아직 덜 쌓인 값이에요.')
 
     uni = get_universe()
     print(f'기준일 {asof} / 스캔 대상 {len(uni)}종목')
     found, errors, first_error = scan_all(uni, asof)
     print(f'신호 {len(found)}종목, 조회 실패 {errors}종목')
+    print(f'통합 일봉(KRX+NXT): 합침 {NXT_STATS["merged"]}, NXT 없음 {NXT_STATS["none"]}, NXT 조회 실패 {NXT_STATS["fail"]}')
     if len(uni) and errors / len(uni) > MAX_ERROR_RATIO:
         print(f'조회 실패가 너무 많아 결과를 저장하지 않습니다. 첫 에러: {first_error}')
         return 1

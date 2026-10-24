@@ -47,7 +47,7 @@ def show(code, lst):
     else:
         print(f'{name} ({code}) 종목 목록에 없음')
     start = (datetime.now(scan.KST) - timedelta(days=scan.LOOKBACK_DAYS)).strftime('%Y-%m-%d')
-    raw = scan.fdr.DataReader(code, start)
+    raw = scan.load_daily(code, start)
     df = scan.prepare(raw)
     crosses = np.flatnonzero(df['cross'].values)
     if len(crosses) == 0:
