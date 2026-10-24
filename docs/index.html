@@ -23,7 +23,7 @@ body{
   font:15px/1.5 "Pretendard Variable", Pretendard, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
   font-variant-numeric:tabular-nums;
 }
-.wrap{max-width:1120px; margin:0 auto; padding:0 16px}
+.wrap{max-width:1480px; margin:0 auto; padding:0 16px}
 header{padding:22px 0 14px}
 .brand{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap}
 h1{margin:0; font-size:22px; font-weight:750; letter-spacing:-.02em}
@@ -31,16 +31,17 @@ h1{margin:0; font-size:22px; font-weight:750; letter-spacing:-.02em}
 .stamp{margin-left:auto; color:var(--sub); font-size:13px; text-align:right}
 .stamp b{color:var(--ink); font-weight:650}
 
-.stage{background:var(--panel); border:1px solid var(--rule)}
+.layout{display:grid; grid-template-columns:minmax(0,1fr) 520px; gap:14px; height:calc(100vh - 118px); min-height:700px; margin-bottom:16px}
+.stage{background:var(--panel); border:1px solid var(--rule); min-height:0; min-width:0; display:flex; flex-direction:column}
 .chartbox h2, .log h2{margin:0; font-size:14px; font-weight:700}
-.chartbox{min-width:0; padding:14px 16px 10px}
+.chartbox{min-width:0; min-height:0; flex:1; display:flex; flex-direction:column; padding:14px 16px 10px}
 .ch-head{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap}
 .ch-head h2{font-size:18px; letter-spacing:-.01em}
 .ch-meta{color:var(--sub); font-size:13px}
-#chartWrap{position:relative; margin-top:10px}
-#chart{height:420px}
-#idxBox{position:relative; margin-top:10px}
-#idxChart{height:150px}
+#chartWrap{position:relative; margin-top:8px; flex:1 1 0; min-height:0}
+#chart{height:100%}
+#idxBox{position:relative; margin-top:10px; flex:1 1 0; min-height:0}
+#idxChart{height:100%}
 #idxLabel{position:absolute; left:10px; top:6px; z-index:3; font-size:12.5px; font-weight:650; color:var(--sub); pointer-events:none}
 #idxBox[hidden]{display:none}
 .vs{display:inline-block; padding:1px 8px; border-radius:3px; font-size:12px; border:1px solid var(--rule); color:var(--sub)}
@@ -59,17 +60,17 @@ h1{margin:0; font-size:22px; font-weight:750; letter-spacing:-.02em}
 .key i{display:inline-block; width:14px; height:3px; margin-right:6px; vertical-align:middle}
 .key .sw{display:inline-block; width:14px; height:10px; margin-right:6px; vertical-align:middle; border:1px solid var(--rule)}
 
-.log{margin:18px 0 40px; background:var(--panel); border:1px solid var(--rule)}
-.log-head{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 16px; border-bottom:1px solid var(--rule)}
+.log{margin:0; background:var(--panel); border:1px solid var(--rule); min-height:0; min-width:0; display:flex; flex-direction:column}
+.log-head{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 14px; border-bottom:1px solid var(--rule); flex:none}
 .log input{
   width:190px; max-width:50%; padding:7px 10px; border:1px solid var(--rule); border-radius:4px;
   background:var(--paper); color:var(--ink); font:inherit; font-size:14px;
 }
 .log input:focus-visible{outline:2px solid var(--mark); outline-offset:1px}
-.scroll{overflow-x:auto}
-table{width:100%; border-collapse:collapse; min-width:640px}
-th, td{padding:10px 16px; text-align:left; border-bottom:1px solid var(--rule); font-size:14px; white-space:nowrap}
-th{color:var(--sub); font-weight:600; font-size:12.5px; background:var(--panel)}
+.scroll{flex:1; min-height:0; overflow:auto}
+table{width:100%; border-collapse:collapse}
+th, td{padding:8px 10px; text-align:left; border-bottom:1px solid var(--rule); font-size:14px; white-space:nowrap}
+th{color:var(--sub); font-weight:600; font-size:12.5px; background:var(--panel); position:sticky; top:0; z-index:1; box-shadow:0 1px 0 var(--rule)}
 tbody tr{cursor:pointer}
 tbody tr:hover{background:var(--hover)}
 tbody tr:last-child td{border-bottom:0}
@@ -79,9 +80,10 @@ td small{display:block; color:var(--sub); font-size:12px}
 .tag{display:inline-block; padding:1px 8px; border-radius:3px; font-size:12px; border:1px solid var(--rule); color:var(--sub)}
 .tag.live{border-color:var(--mark); color:var(--mark)}
 
-@media (max-width:860px){
-  #chart{height:340px}
-  #idxChart{height:120px}
+@media (max-width:1040px){
+  .layout{grid-template-columns:1fr; height:auto}
+  .stage{height:640px}
+  .log{height:560px}
   .stamp{margin-left:0; text-align:left; width:100%}
 }
 </style>
@@ -97,7 +99,7 @@ td small{display:block; color:var(--sub); font-size:12px}
   </div>
 </header>
 
-<main class="wrap">
+<main class="wrap layout">
   <section class="stage" aria-label="기준봉 차트">
     <div class="chartbox">
       <div class="ch-head"><h2 id="chTitle">차트</h2><span class="ch-meta" id="chMeta"></span></div>
@@ -133,7 +135,7 @@ td small{display:block; color:var(--sub); font-size:12px}
     <div class="scroll">
       <table>
         <thead><tr>
-          <th>포착일</th><th>종목</th><th class="num">종가</th><th class="num">등락률</th><th>지수 대비</th><th>역배열 시작</th><th>구간 끝</th><th>상태</th>
+          <th>포착일</th><th>종목</th><th class="num">등락률</th><th>지수 대비</th><th>상태</th>
         </tr></thead>
         <tbody id="logBody"></tbody>
       </table>
@@ -316,13 +318,10 @@ td small{display:block; color:var(--sub); font-size:12px}
     $('#logBody').innerHTML = rows.map((h) => {
       const live = asof && h.window_end >= asof;
       return `<tr data-code="${esc(h.code)}" data-date="${esc(h.signal_date)}">
-        <td>${esc(h.signal_date)}</td>
-        <td><b>${esc(h.name)}</b><small>${esc(h.code)} · ${esc(h.market)}</small></td>
-        <td class="num">${nf.format(h.close)}</td>
+        <td>${esc(h.signal_date.slice(5))}<small>${esc(h.signal_date.slice(0, 4))}</small></td>
+        <td><b>${esc(h.name)}</b><small>${esc(h.code)} · ${esc(h.market)} · 종가 ${nf.format(h.close)}</small><small>역배열 ${esc(md(h.cross_date))} ~ ${esc(md(h.window_end))}</small></td>
         <td class="num ${h.change_pct >= 0 ? 'up' : 'down'}">${pct(h.change_pct)}</td>
         <td>${vsTag(vsOf(h))}</td>
-        <td>${esc(h.cross_date)}</td>
-        <td>${esc(h.window_end)}</td>
         <td><span class="tag ${live ? 'live' : ''}">${live ? '진행 중' : '확정'}</span></td>
       </tr>`;
     }).join('');
