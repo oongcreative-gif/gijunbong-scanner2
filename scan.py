@@ -43,9 +43,9 @@ INDEX_BARS = 330
 
 KST = ZoneInfo('Asia/Seoul')
 MA_SHORT, MA_LONG = 60, 120
-WINDOW_DAYS = 60          # 역배열 시작일(=1일째)부터 60일째까지 (달력일)
+WINDOW_DAYS = 60          # (사용 안 함) 예전 방식: 역배열 60일 제한. 지금은 정배열로 돌아설 때까지 무제한
 HIGH_BARS = 60            # 기준봉 종가 비교 기간 (거래일 봉 수, 자기 포함)
-LOOKBACK_DAYS = 420       # 달력일 기준 조회 기간
+LOOKBACK_DAYS = 800       # 달력일 기준 조회 기간
 CHART_BARS = 170          # 사이트 차트에 쓸 봉 수
 MIN_MARCAP = 50_000_000_000   # 시총 500억 이상
 MIN_AMOUNT = 1_000_000_000    # 당일 거래대금 10억 이상
@@ -68,14 +68,14 @@ def prepare(df):
     return df
 
 
-def check_at(df, i, window_days=WINDOW_DAYS):
+def check_at(df, i, window_days=None):
     """i번째 봉이 '기준봉 신고(갱신)'이면 dict, 아니면 None"""
     crosses = np.flatnonzero(df['cross'].values[:i + 1])
     if len(crosses) == 0:
         return None
     c = int(crosses[-1])                                  # 가장 최근 역전일
     day_no = (df.index[i] - df.index[c]).days + 1         # 역전일이 1일째
-    if day_no > window_days:
+    if window_days is not None and day_no > window_days:
         return None                                       # 60일 지남 -> 그 구간 기준봉은 확정
     if not df['inv'].values[c:i].all():
         return None                                       # 중간에 정배열로 돌아섰으면 구간 끝
@@ -91,7 +91,7 @@ def check_at(df, i, window_days=WINDOW_DAYS):
     return {
         'signal_date': df.index[i].date().isoformat(),
         'cross_date': cross_date.isoformat(),
-        'window_end': (cross_date + timedelta(days=WINDOW_DAYS - 1)).isoformat(),
+        'window_end': '',                                  # 기간 제한 없음: 정배열로 돌아서기 전까지 유효(빈 값=진행 중)
         'day_no': int(day_no),
         'bar_no': int(i - c + 1),
         'close': float(row['Close']),
@@ -263,7 +263,7 @@ def build_messages(signals, asof):
         for s in part:
             lines.append(f"{s['name']} ({s['code']}) {s['market']}")
             lines.append(f"  종가 {s['close']:,.0f}원 ({s['change_pct']:+.1f}%) / 거래량 {s['volume']:,}")
-            lines.append(f"  역배열 {s['cross_date']} 시작, {s['day_no']}일째 (구간 끝 {s['window_end']})")
+            lines.append(f"  역배열 {s['cross_date']} 시작, {s['day_no']}일째 (정배열 전까지 유효)")
         if site and k + 20 >= len(signals):
             lines += ['', site]
         msgs.append('\n'.join(lines))

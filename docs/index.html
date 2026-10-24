@@ -31,7 +31,7 @@ h1{margin:0; font-size:22px; font-weight:750; letter-spacing:-.02em}
 .stamp{margin-left:auto; color:var(--sub); font-size:13px; text-align:right}
 .stamp b{color:var(--ink); font-weight:650}
 
-.layout{display:grid; grid-template-columns:minmax(0,1fr) 520px; gap:14px; height:calc(100vh - 118px); min-height:700px; margin-bottom:16px}
+.layout{display:grid; grid-template-columns:minmax(0,1fr) 520px; gap:14px; height:calc(100vh - 118px); min-height:860px; margin-bottom:16px}
 .stage{background:var(--panel); border:1px solid var(--rule); min-height:0; min-width:0; display:flex; flex-direction:column}
 .chartbox h2, .log h2{margin:0; font-size:14px; font-weight:700}
 .chartbox{min-width:0; min-height:0; flex:1; display:flex; flex-direction:column; padding:14px 16px 10px}
@@ -56,6 +56,20 @@ h1{margin:0; font-size:22px; font-weight:750; letter-spacing:-.02em}
 .seg button[aria-pressed="true"]{background:var(--mark); color:#fff; font-weight:650}
 .seg button:focus-visible{outline:2px solid var(--mark); outline-offset:-2px}
 .ch-tools small{color:var(--sub); font-size:12.5px}
+.info{flex:none; display:flex; gap:22px; flex-wrap:wrap; margin-top:10px; padding-top:10px; border-top:1px solid var(--rule); font-size:13px}
+.info[hidden]{display:none}
+.facts{min-width:170px}
+.facts h3, .flowbox h3{margin:0 0 4px; font-size:12.5px; font-weight:650; color:var(--sub)}
+.facts div{display:flex; justify-content:space-between; gap:10px; padding:2px 0}
+.facts b{font-weight:650}
+.facts .warn{color:var(--mark)}
+.flowbox{flex:1; min-width:300px}
+table.flows{min-width:0}
+.flows th, .flows td{padding:2px 8px; font-size:12.5px; border:0; position:static; box-shadow:none; background:transparent}
+.flows th{color:var(--sub); font-weight:600}
+.flows tr.sig td{font-weight:700; background:var(--hover)}
+.flows tr.sum td{border-top:1px solid var(--rule); color:var(--sub)}
+.noinfo{color:var(--sub); font-size:12.5px}
 .key{display:flex; gap:16px; flex-wrap:wrap; color:var(--sub); font-size:12.5px; margin-top:6px}
 .key i{display:inline-block; width:14px; height:3px; margin-right:6px; vertical-align:middle}
 .key .sw{display:inline-block; width:14px; height:10px; margin-right:6px; vertical-align:middle; border:1px solid var(--rule)}
@@ -121,6 +135,7 @@ td small{display:block; color:var(--sub); font-size:12px}
         <div id="chart" role="img" aria-label="캔들 차트"></div>
       </div>
       <div class="view" id="view"></div>
+      <div class="info" id="info" hidden></div>
       <div class="key">
         <span><i style="background:#f59e0b"></i>60일선</span>
         <span><i style="background:#8b5cf6"></i>120일선</span>
@@ -162,7 +177,7 @@ td small{display:block; color:var(--sub); font-size:12px}
   let today = [], history = [], asof = null, activeKey = null;
   let chart = null, candle = null, vol = null, m60 = null, m120 = null, band = null;
   let cur = null;                  // 지금 보고 있는 차트 데이터
-  let indexData = {}, idxPick = 'auto', idxChart = null, idxCandle = null, curStock = null, syncing = false;
+  let infoData = {}, indexData = {}, idxPick = 'auto', idxChart = null, idxCandle = null, curStock = null, syncing = false;
   let span = 60;                   // 화면에 보여줄 봉 수 (0 = 전체)
 
   const palette = () => dark()
@@ -246,6 +261,35 @@ td small{display:block; color:var(--sub); font-size:12px}
     syncIdx();
   }
 
+  // ---- 종목 정보 + 기준봉 전후 수급 (info.json)
+  const fmtQty = (v) => { if (v == null) return '-'; const a = Math.abs(v); return (v > 0 ? '+' : v < 0 ? '-' : '') + (a >= 10000 ? (a / 10000).toFixed(1) + '만' : nf.format(a)); };
+  const flowCls = (v) => (v > 0 ? 'up' : v < 0 ? 'down' : '');
+  const fmtCap = (v) => { if (!v) return '-'; const j = v / 1e12; return j >= 1 ? j.toFixed(1) + '조' : nf.format(Math.round(v / 1e8)) + '억'; };
+  const fmtPeriod = (p) => (/^\d{6}/.test(p || '') ? `${p.slice(2, 4)}.${p.slice(4, 6)}` : (p || ''));
+
+  function renderInfo(s) {
+    const box = $('#info'), rec = infoData[s.code + '|' + s.signal_date];
+    box.hidden = false;
+    if (!rec) { box.innerHTML = '<span class="noinfo">종목 정보·수급은 아직 없어요. Actions에서 info_scan 을 실행하면 채워져요.</span>'; return; }
+    const closeOf = (d) => { const i = cur ? cur.t.indexOf(d) : -1; return i >= 0 ? cur.c[i] : null; };
+    const debt = rec.debt_ratio, res = rec.reserve_ratio;
+    const facts = `<div class="facts"><h3>종목 정보</h3>
+      <div><span>시가총액</span><b>${fmtCap(rec.marcap)}</b></div>
+      <div><span>부채비율${rec.debt_period ? ` <small>(${esc(fmtPeriod(rec.debt_period))})</small>` : ''}</span><b class="${debt != null && debt >= 200 ? 'warn' : ''}">${debt != null ? nf.format(Math.round(debt)) + '%' : '-'}</b></div>
+      <div><span>유보율${rec.reserve_period ? ` <small>(${esc(fmtPeriod(rec.reserve_period))})</small>` : ''}</span><b>${res != null ? nf.format(Math.round(res)) + '%' : '-'}</b></div></div>`;
+    const flows = rec.flows || [];
+    let flowHtml = '<span class="noinfo">수급 정보가 없어요.</span>';
+    if (flows.length) {
+      const before = flows.filter((f) => f.d < s.signal_date);
+      const sum = (k) => before.reduce((a, f) => a + (f[k] || 0), 0);
+      const cell = (f, k) => { const c = closeOf(f.d); return `<td class="num ${flowCls(f[k])}" title="${c && f[k] != null ? '약 ' + nf.format(Math.round(f[k] * c / 1e8 * 10) / 10) + '억원 (순매수량×종가)' : ''}">${fmtQty(f[k])}</td>`; };
+      flowHtml = `<table class="flows"><thead><tr><th>날짜</th><th class="num">개인</th><th class="num">외국인</th><th class="num">기관</th></tr></thead><tbody>${
+        flows.map((f) => `<tr class="${f.d === s.signal_date ? 'sig' : ''}"><td>${esc(f.d.slice(5))}${f.d === s.signal_date ? ' 기준봉' : ''}</td>${cell(f, 'ind')}${cell(f, 'frn')}${cell(f, 'org')}</tr>`).join('')
+      }${before.length ? `<tr class="sum"><td>전 ${before.length}일 합</td><td class="num ${flowCls(sum('ind'))}">${fmtQty(sum('ind'))}</td><td class="num ${flowCls(sum('frn'))}">${fmtQty(sum('frn'))}</td><td class="num ${flowCls(sum('org'))}">${fmtQty(sum('org'))}</td></tr>` : ''}</tbody></table>`;
+    }
+    box.innerHTML = facts + `<div class="flowbox"><h3>투자자별 순매수 (주) <small>마우스를 올리면 대략 금액</small></h3>${flowHtml}</div>`;
+  }
+
   const dayDiff = (a, b) => Math.round((Date.parse(a) - Date.parse(b)) / 86400000);
 
   function onRange(r) {
@@ -280,7 +324,7 @@ td small{display:block; color:var(--sub); font-size:12px}
     const bg = [];
     d.t.forEach((t, i) => {
       if (d.ma60[i] != null && d.ma120[i] != null && d.ma60[i] >= d.ma120[i]) bg.push({time: t, value: 1, color: p.yel});
-      else if (t >= d.cross_date && t <= d.window_end) bg.push({time: t, value: 1, color: p.band});
+      else if (t >= d.cross_date && (!d.window_end || t <= d.window_end)) bg.push({time: t, value: 1, color: p.band});
     });
     band.setData(bg);
     const marks = [];
@@ -288,6 +332,7 @@ td small{display:block; color:var(--sub); font-size:12px}
     marks.push({time: d.signal_date, position: 'belowBar', color: p.up, shape: 'arrowUp', text: '기준봉'});
     marks.sort((a, b) => (a.time < b.time ? -1 : a.time > b.time ? 1 : 0));
     candle.setMarkers(marks);
+    renderInfo(s);
     showIndex(s);
     applyRange();
   }
@@ -317,10 +362,10 @@ td small{display:block; color:var(--sub); font-size:12px}
     const q = $('#q').value.trim().toLowerCase();
     const rows = history.filter((h) => !q || h.name.toLowerCase().includes(q) || h.code.includes(q)).slice(0, 300);
     $('#logBody').innerHTML = rows.map((h) => {
-      const live = asof && h.window_end >= asof;
+      const live = !h.window_end || (asof && h.window_end >= asof);
       return `<tr data-code="${esc(h.code)}" data-date="${esc(h.signal_date)}">
         <td>${esc(h.signal_date.slice(5))}<small>${esc(h.signal_date.slice(0, 4))}</small></td>
-        <td><b>${esc(h.name)}</b>${live ? ' <span class="tag live">진행 중</span>' : ''}<small>${esc(h.code)} · ${esc(h.market)} · 종가 ${nf.format(h.close)}</small><small>역배열 ${esc(md(h.cross_date))} ~ ${esc(md(h.window_end))}</small></td>
+        <td><b>${esc(h.name)}</b>${live ? ' <span class="tag live">진행 중</span>' : ''}<small>${esc(h.code)} · ${esc(h.market)} · 종가 ${nf.format(h.close)}</small><small>역배열 ${esc(md(h.cross_date))} ~ ${h.window_end ? esc(md(h.window_end)) : '진행'}</small></td>
         <td class="num ${h.change_pct >= 0 ? 'up' : 'down'}">${pct(h.change_pct)}</td>
         <td>${vsTag(vsOf(h))}</td>
       </tr>`;
@@ -355,6 +400,7 @@ td small{display:block; color:var(--sub); font-size:12px}
     wireSeg();
     wireIdxSeg();
     try { indexData = await getJSON('data/index.json'); } catch (e) { indexData = {}; }
+    try { infoData = await getJSON('data/info.json'); } catch (e) { infoData = {}; }
     let latest = {signals: [], asof: null};
     try { latest = await getJSON('data/latest.json'); } catch (e) { /* 아래 안내 문구로 처리 */ }
     try { history = await getJSON('data/history.json'); } catch (e) { history = []; }
