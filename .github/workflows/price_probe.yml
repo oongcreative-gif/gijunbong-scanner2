@@ -1,0 +1,54 @@
+name: price_probe
+
+on:
+  workflow_dispatch:
+    inputs:
+      code:
+        description: '종목 코드 (6자리)'
+        required: true
+        default: '456160'
+        type: string
+      date:
+        description: '날짜 (YYYY-MM-DD)'
+        required: true
+        default: '2026-08-14'
+        type: string
+      open:
+        description: 'HTS 시가'
+        required: false
+        default: '43350'
+        type: string
+      close:
+        description: 'HTS 종가'
+        required: false
+        default: '44600'
+        type: string
+      volume:
+        description: 'HTS 거래량'
+        required: false
+        default: '358632'
+        type: string
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install
+        run: pip install -r requirements.txt
+
+      - name: Probe
+        run: python price_probe.py
+        env:
+          CODE: ${{ github.event.inputs.code }}
+          DATE: ${{ github.event.inputs.date }}
+          OPEN: ${{ github.event.inputs.open }}
+          CLOSE: ${{ github.event.inputs.close }}
+          VOLUME: ${{ github.event.inputs.volume }}
