@@ -360,7 +360,7 @@ td small{display:block; color:var(--sub); font-size:12px}
 
   function renderLog() {
     const q = $('#q').value.trim().toLowerCase();
-    const rows = history.filter((h) => !q || h.name.toLowerCase().includes(q) || h.code.includes(q)).slice(0, 300);
+    const rows = history.filter((h) => !q || h.name.toLowerCase().includes(q) || h.code.includes(q)).slice(0, 3000);
     $('#logBody').innerHTML = rows.map((h) => {
       const live = !h.window_end || (asof && h.window_end >= asof);
       return `<tr data-code="${esc(h.code)}" data-date="${esc(h.signal_date)}">
