@@ -109,7 +109,7 @@ td small{display:block; color:var(--sub); font-size:12px}
       <h1>기준봉 스캐너</h1>
       <div class="stamp" id="stamp">불러오는 중</div>
     </div>
-    <p class="rule-line">120일선이 60일선 위로 역전한 날부터 60일 동안, 양봉이면서 종가가 직전 60거래일 모든 봉(음봉 포함)보다 높은 첫 봉. 지수 대비는 기준봉 날 종목이 양봉으로 전날 고점을 넘고 지수는 못 넘었으면 '강함'</p>
+    <p class="rule-line">120일선이 60일선 위로 역전한 날부터 60일 동안, 양봉이면서 종가가 직전 60거래일 모든 봉(음봉 포함)보다 높은 첫 봉. 지수 대비 ▲는 기준봉 날 코스피 지수가 음봉이었다는 표시 (아니면 공란)</p>
   </div>
 </header>
 
@@ -123,11 +123,6 @@ td small{display:block; color:var(--sub); font-size:12px}
           <button type="button" data-n="120" aria-pressed="false">120봉</button>
           <button type="button" data-n="0" aria-pressed="false">전체</button>
         </div>
-        <div class="seg" id="idxSeg" role="group" aria-label="같이 볼 지수">
-          <button type="button" data-i="auto" aria-pressed="true">지수 자동</button>
-          <button type="button" data-i="KOSPI" aria-pressed="false">코스피</button>
-          <button type="button" data-i="KOSDAQ" aria-pressed="false">코스닥</button>
-        </div>
         <small>HTS처럼 60봉만 크게 보여줘요. 마우스 휠로 확대·축소, 끌어서 이동해요.</small>
       </div>
       <div id="idxBox" hidden><span id="idxLabel"></span><div id="idxChart" role="img" aria-label="지수 차트"></div></div>
@@ -139,6 +134,7 @@ td small{display:block; color:var(--sub); font-size:12px}
       <div class="key">
         <span><i style="background:#f59e0b"></i>60일선</span>
         <span><i style="background:#8b5cf6"></i>120일선</span>
+        <span><i style="background:#2dd4bf"></i>코스피 20일선</span>
         <span><span class="sw" style="background:rgba(250,204,21,.35)"></span>정배열 (60선 위)</span>
         <span><span class="sw" style="background:rgba(100,130,255,.22)"></span>역배열 60일 구간</span>
       </div>
@@ -177,7 +173,7 @@ td small{display:block; color:var(--sub); font-size:12px}
   let today = [], history = [], asof = null, activeKey = null;
   let chart = null, candle = null, vol = null, m60 = null, m120 = null, band = null;
   let cur = null;                  // 지금 보고 있는 차트 데이터
-  let infoData = {}, indexData = {}, idxPick = 'auto', idxChart = null, idxCandle = null, curStock = null, syncing = false;
+  let infoData = {}, indexData = {}, idxChart = null, idxCandle = null, idxMa20 = null, curStock = null, syncing = false;
   let span = 60;                   // 화면에 보여줄 봉 수 (0 = 전체)
 
   const palette = () => dark()
@@ -211,10 +207,18 @@ td small{display:block; color:var(--sub); font-size:12px}
     chart.timeScale().subscribeVisibleTimeRangeChange(syncIdx);
   }
 
-  const idxName = (s) => (idxPick === 'auto' ? (s.market === 'KOSDAQ' ? 'KOSDAQ' : 'KOSPI') : idxPick);
-  const idxKo = (n) => (n === 'KOSDAQ' ? '코스닥' : '코스피');
+  // 지수는 코스피로 고정
+  const idxName = () => 'KOSPI';
+  const idxKo = () => '코스피';
   const vsOf = (s) => (s.vs || {})[idxName(s)] || null;
-  const vsTag = (v) => (v ? `<span class="vs ${v.v === '강함' ? 'strong' : v.v === '약함' ? 'weak' : ''}" title="종목: 양봉으로 전날 고점 돌파 / 지수: 전날 고점 돌파 여부">${v.v}</span>` : '<span class="vs">-</span>');
+  // 지수 대비: 기준봉 날 코스피가 음봉이면 빨간 위 화살표, 아니면 공란
+  const vsTag = (s) => {
+    const k = indexData.KOSPI;
+    const i = k ? k.t.indexOf(s.signal_date) : -1;
+    return i >= 0 && k.c[i] < k.o[i]
+      ? '<span class="up" title="기준봉 날 코스피 음봉" style="font-size:16px;font-weight:700">▲</span>'
+      : '';
+  };
 
   function ensureIdxChart() {
     if (idxChart) return;
@@ -232,6 +236,7 @@ td small{display:block; color:var(--sub); font-size:12px}
       upColor: p.up, downColor: p.down, borderUpColor: p.up, borderDownColor: p.down,
       wickUpColor: p.up, wickDownColor: p.down, priceFormat: {type: 'price', precision: 2, minMove: 0.01},
     });
+    idxMa20 = idxChart.addLineSeries({color: '#2dd4bf', lineWidth: 2, priceLineVisible: false, lastValueVisible: false});
     new ResizeObserver(() => idxChart.applyOptions({width: el.clientWidth, height: el.clientHeight})).observe(el);
   }
 
@@ -254,6 +259,15 @@ td small{display:block; color:var(--sub); font-size:12px}
     const bars = [];
     idx.t.forEach((t, i) => { if (t >= first) bars.push({time: t, open: idx.o[i], high: idx.h[i], low: idx.l[i], close: idx.c[i]}); });
     idxCandle.setData(bars);
+    // 코스피 20일선 (민트색): 전체 지수 종가로 계산하고 화면 구간만 표시
+    const ma = [];
+    idx.c.forEach((_, i) => {
+      if (i < 19 || idx.t[i] < first) return;
+      let sum = 0;
+      for (let j = i - 19; j <= i; j++) sum += idx.c[j];
+      ma.push({time: idx.t[i], value: sum / 20});
+    });
+    idxMa20.setData(ma);
     const p = palette();
     idxCandle.setMarkers(bars.some((b) => b.time === s.signal_date) ? [{time: s.signal_date, position: 'belowBar', color: p.mark, shape: 'arrowUp', text: ''}] : []);
     const v = vsOf(s);
@@ -367,7 +381,7 @@ td small{display:block; color:var(--sub); font-size:12px}
         <td>${esc(h.signal_date.slice(5))}<small>${esc(h.signal_date.slice(0, 4))}</small></td>
         <td><b>${esc(h.name)}</b>${live ? ' <span class="tag live">진행 중</span>' : ''}<small>${esc(h.code)} · ${esc(h.market)} · 종가 ${nf.format(h.close)}</small><small>역배열 ${esc(md(h.cross_date))} ~ ${h.window_end ? esc(md(h.window_end)) : '진행'}</small></td>
         <td class="num ${h.change_pct >= 0 ? 'up' : 'down'}">${pct(h.change_pct)}</td>
-        <td>${vsTag(vsOf(h))}</td>
+        <td>${vsTag(h)}</td>
       </tr>`;
     }).join('');
     const empty = $('#logEmpty');
@@ -387,18 +401,8 @@ td small{display:block; color:var(--sub); font-size:12px}
     }));
   }
 
-  function wireIdxSeg() {
-    document.querySelectorAll('#idxSeg button').forEach((b) => b.addEventListener('click', () => {
-      idxPick = b.dataset.i;
-      document.querySelectorAll('#idxSeg button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
-      renderLog();
-      if (curStock && cur) { showIndex(curStock); $('#chMeta').textContent = $('#chMeta').textContent.replace(/ · 지수보다 .*$/, '') + (vsOf(curStock) ? ` · 지수보다 ${vsOf(curStock).v}` : ''); }
-    }));
-  }
-
   async function init() {
     wireSeg();
-    wireIdxSeg();
     try { indexData = await getJSON('data/index.json'); } catch (e) { indexData = {}; }
     try { infoData = await getJSON('data/info.json'); } catch (e) { infoData = {}; }
     let latest = {signals: [], asof: null};
