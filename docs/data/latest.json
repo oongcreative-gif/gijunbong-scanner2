@@ -1,6 +1,21 @@
 {
- "updated_at": "2026-10-24T16:28:06+09:00",
- "asof": "2026-10-23",
- "universe_size": 700,
- "signals": []
+ "updated_at": "2026-10-26T20:43:03+09:00",
+ "asof": "2026-10-26",
+ "universe_size": 664,
+ "signals": [
+  {
+   "signal_date": "2026-10-26",
+   "cross_date": "2026-06-09",
+   "window_end": "",
+   "day_no": 140,
+   "bar_no": 94,
+   "close": 3250.0,
+   "change_pct": 17.12,
+   "volume": 9485613,
+   "code": "241690",
+   "name": "유니테크노",
+   "market": "KOSDAQ",
+   "chart": "charts/241690_2026-10-26.json"
+  }
+ ]
 }
