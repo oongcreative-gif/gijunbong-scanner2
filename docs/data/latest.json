@@ -1,22 +1,8 @@
 {
- "updated_at": "2026-10-27T19:04:38+09:00",
+ "updated_at": "2026-10-27T20:36:48+09:00",
  "asof": "2026-10-27",
  "universe_size": 703,
  "signals": [
-  {
-   "signal_date": "2026-10-27",
-   "cross_date": "2025-12-22",
-   "window_end": "",
-   "day_no": 310,
-   "bar_no": 205,
-   "close": 21050.0,
-   "change_pct": 13.72,
-   "volume": 1683718,
-   "code": "097520",
-   "name": "엠씨넥스",
-   "market": "KOSPI",
-   "chart": "charts/097520_2026-10-27.json"
-  },
   {
    "signal_date": "2026-10-27",
    "cross_date": "2026-05-06",
@@ -25,7 +11,7 @@
    "bar_no": 117,
    "close": 17090.0,
    "change_pct": 10.05,
-   "volume": 3944220,
+   "volume": 3944357,
    "code": "190510",
    "name": "나무가",
    "market": "KOSDAQ",
