@@ -1,6 +1,31 @@
 [
  {
   "signal_date": "2026-10-28",
+  "cross_date": "2026-07-21",
+  "window_end": "",
+  "day_no": 100,
+  "bar_no": 67,
+  "close": 9080.0,
+  "change_pct": 10.06,
+  "volume": 176409,
+  "code": "170790",
+  "name": "파이오링크",
+  "market": "KOSDAQ",
+  "chart": "charts/170790_2026-10-28.json",
+  "notified": true,
+  "vs": {
+   "KOSPI": {
+    "v": "보통",
+    "idx_pct": 6.63
+   },
+   "KOSDAQ": {
+    "v": "보통",
+    "idx_pct": 3.69
+   }
+  }
+ },
+ {
+  "signal_date": "2026-10-28",
   "cross_date": "2026-05-28",
   "window_end": "",
   "day_no": 154,
