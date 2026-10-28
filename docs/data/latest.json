@@ -1,21 +1,21 @@
 {
- "updated_at": "2026-10-27T20:36:48+09:00",
- "asof": "2026-10-27",
- "universe_size": 703,
+ "updated_at": "2026-10-28T19:12:02+09:00",
+ "asof": "2026-10-28",
+ "universe_size": 588,
  "signals": [
   {
-   "signal_date": "2026-10-27",
-   "cross_date": "2026-05-06",
+   "signal_date": "2026-10-28",
+   "cross_date": "2026-05-28",
    "window_end": "",
-   "day_no": 175,
-   "bar_no": 117,
-   "close": 17090.0,
-   "change_pct": 10.05,
-   "volume": 3944357,
-   "code": "190510",
-   "name": "나무가",
+   "day_no": 154,
+   "bar_no": 103,
+   "close": 11950.0,
+   "change_pct": 4.09,
+   "volume": 348770,
+   "code": "060720",
+   "name": "KH바텍",
    "market": "KOSDAQ",
-   "chart": "charts/190510_2026-10-27.json"
+   "chart": "charts/060720_2026-10-28.json"
   }
  ]
 }
