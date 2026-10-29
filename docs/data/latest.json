@@ -1,35 +1,6 @@
 {
- "updated_at": "2026-10-28T20:43:03+09:00",
- "asof": "2026-10-28",
- "universe_size": 720,
- "signals": [
-  {
-   "signal_date": "2026-10-28",
-   "cross_date": "2026-07-21",
-   "window_end": "",
-   "day_no": 100,
-   "bar_no": 67,
-   "close": 9080.0,
-   "change_pct": 10.06,
-   "volume": 176409,
-   "code": "170790",
-   "name": "파이오링크",
-   "market": "KOSDAQ",
-   "chart": "charts/170790_2026-10-28.json"
-  },
-  {
-   "signal_date": "2026-10-28",
-   "cross_date": "2026-05-28",
-   "window_end": "",
-   "day_no": 154,
-   "bar_no": 103,
-   "close": 12030.0,
-   "change_pct": 4.79,
-   "volume": 353470,
-   "code": "060720",
-   "name": "KH바텍",
-   "market": "KOSDAQ",
-   "chart": "charts/060720_2026-10-28.json"
-  }
- ]
+ "updated_at": "2026-10-29T19:14:18+09:00",
+ "asof": "2026-10-29",
+ "universe_size": 596,
+ "signals": []
 }
