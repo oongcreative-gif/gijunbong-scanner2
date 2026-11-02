@@ -1,6 +1,49 @@
 {
- "updated_at": "2026-10-30T20:39:35+09:00",
- "asof": "2026-10-30",
- "universe_size": 687,
- "signals": []
+ "updated_at": "2026-11-02T19:27:08+09:00",
+ "asof": "2026-11-02",
+ "universe_size": 515,
+ "signals": [
+  {
+   "signal_date": "2026-11-02",
+   "cross_date": "2026-04-06",
+   "window_end": "",
+   "day_no": 211,
+   "bar_no": 141,
+   "close": 3560.0,
+   "change_pct": 17.11,
+   "volume": 466224,
+   "code": "235980",
+   "name": "메드팩토",
+   "market": "KOSDAQ",
+   "chart": "charts/235980_2026-11-02.json"
+  },
+  {
+   "signal_date": "2026-11-02",
+   "cross_date": "2026-05-08",
+   "window_end": "",
+   "day_no": 179,
+   "bar_no": 119,
+   "close": 133600.0,
+   "change_pct": 3.89,
+   "volume": 42415,
+   "code": "006280",
+   "name": "녹십자",
+   "market": "KOSPI",
+   "chart": "charts/006280_2026-11-02.json"
+  },
+  {
+   "signal_date": "2026-11-02",
+   "cross_date": "2026-04-23",
+   "window_end": "",
+   "day_no": 194,
+   "bar_no": 128,
+   "close": 103000.0,
+   "change_pct": 2.49,
+   "volume": 43427,
+   "code": "005300",
+   "name": "롯데칠성",
+   "market": "KOSPI",
+   "chart": "charts/005300_2026-11-02.json"
+  }
+ ]
 }
