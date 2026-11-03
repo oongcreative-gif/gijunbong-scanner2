@@ -1,35 +1,21 @@
 {
- "updated_at": "2026-11-02T20:53:07+09:00",
- "asof": "2026-11-02",
- "universe_size": 515,
+ "updated_at": "2026-11-03T19:17:26+09:00",
+ "asof": "2026-11-03",
+ "universe_size": 580,
  "signals": [
   {
-   "signal_date": "2026-11-02",
-   "cross_date": "2026-04-06",
+   "signal_date": "2026-11-03",
+   "cross_date": "2026-06-12",
    "window_end": "",
-   "day_no": 211,
-   "bar_no": 141,
-   "close": 3560.0,
-   "change_pct": 17.11,
-   "volume": 469368,
-   "code": "235980",
-   "name": "메드팩토",
-   "market": "KOSDAQ",
-   "chart": "charts/235980_2026-11-02.json"
-  },
-  {
-   "signal_date": "2026-11-02",
-   "cross_date": "2026-05-08",
-   "window_end": "",
-   "day_no": 179,
-   "bar_no": 119,
-   "close": 133800.0,
-   "change_pct": 4.04,
-   "volume": 42753,
-   "code": "006280",
-   "name": "녹십자",
+   "day_no": 145,
+   "bar_no": 97,
+   "close": 1397.0,
+   "change_pct": 28.76,
+   "volume": 2888942,
+   "code": "004540",
+   "name": "깨끗한나라",
    "market": "KOSPI",
-   "chart": "charts/006280_2026-11-02.json"
+   "chart": "charts/004540_2026-11-03.json"
   }
  ]
 }
