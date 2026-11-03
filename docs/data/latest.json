@@ -1,5 +1,5 @@
 {
- "updated_at": "2026-11-03T19:17:26+09:00",
+ "updated_at": "2026-11-03T20:49:25+09:00",
  "asof": "2026-11-03",
  "universe_size": 580,
  "signals": [
@@ -11,7 +11,7 @@
    "bar_no": 97,
    "close": 1397.0,
    "change_pct": 28.76,
-   "volume": 2888942,
+   "volume": 2889083,
    "code": "004540",
    "name": "깨끗한나라",
    "market": "KOSPI",
