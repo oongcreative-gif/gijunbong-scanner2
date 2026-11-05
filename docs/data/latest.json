@@ -1,35 +1,35 @@
 {
- "updated_at": "2026-11-04T20:56:19+09:00",
- "asof": "2026-11-04",
- "universe_size": 600,
+ "updated_at": "2026-11-05T19:26:53+09:00",
+ "asof": "2026-11-05",
+ "universe_size": 640,
  "signals": [
   {
-   "signal_date": "2026-11-04",
-   "cross_date": "2026-06-11",
+   "signal_date": "2026-11-05",
+   "cross_date": "2026-05-20",
    "window_end": "",
-   "day_no": 147,
-   "bar_no": 99,
-   "close": 28050.0,
-   "change_pct": 8.3,
-   "volume": 395977,
-   "code": "383310",
-   "name": "에코프로에이치엔",
-   "market": "KOSDAQ",
-   "chart": "charts/383310_2026-11-04.json"
+   "day_no": 170,
+   "bar_no": 114,
+   "close": 6300.0,
+   "change_pct": 31.94,
+   "volume": 1219824,
+   "code": "000180",
+   "name": "성창기업지주",
+   "market": "KOSPI",
+   "chart": "charts/000180_2026-11-05.json"
   },
   {
-   "signal_date": "2026-11-04",
-   "cross_date": "2026-07-06",
+   "signal_date": "2026-11-05",
+   "cross_date": "2026-06-26",
    "window_end": "",
-   "day_no": 122,
-   "bar_no": 82,
-   "close": 15620.0,
-   "change_pct": 7.35,
-   "volume": 3881308,
-   "code": "032640",
-   "name": "LG유플러스",
-   "market": "KOSPI",
-   "chart": "charts/032640_2026-11-04.json"
+   "day_no": 133,
+   "bar_no": 89,
+   "close": 8700.0,
+   "change_pct": 11.25,
+   "volume": 7686484,
+   "code": "282720",
+   "name": "금양그린파워",
+   "market": "KOSDAQ",
+   "chart": "charts/282720_2026-11-05.json"
   }
  ]
 }
