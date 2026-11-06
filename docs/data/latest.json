@@ -1,35 +1,6 @@
 {
- "updated_at": "2026-11-05T20:56:17+09:00",
- "asof": "2026-11-05",
- "universe_size": 640,
- "signals": [
-  {
-   "signal_date": "2026-11-05",
-   "cross_date": "2026-05-20",
-   "window_end": "",
-   "day_no": 170,
-   "bar_no": 114,
-   "close": 6350.0,
-   "change_pct": 32.98,
-   "volume": 1262889,
-   "code": "000180",
-   "name": "성창기업지주",
-   "market": "KOSPI",
-   "chart": "charts/000180_2026-11-05.json"
-  },
-  {
-   "signal_date": "2026-11-05",
-   "cross_date": "2026-06-26",
-   "window_end": "",
-   "day_no": 133,
-   "bar_no": 89,
-   "close": 8660.0,
-   "change_pct": 10.74,
-   "volume": 7755850,
-   "code": "282720",
-   "name": "금양그린파워",
-   "market": "KOSDAQ",
-   "chart": "charts/282720_2026-11-05.json"
-  }
- ]
+ "updated_at": "2026-11-06T19:24:59+09:00",
+ "asof": "2026-11-06",
+ "universe_size": 667,
+ "signals": []
 }
