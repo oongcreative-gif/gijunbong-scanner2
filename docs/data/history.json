@@ -1,5 +1,30 @@
 [
  {
+  "signal_date": "2026-11-09",
+  "cross_date": "2026-02-27",
+  "window_end": "",
+  "day_no": 256,
+  "bar_no": 171,
+  "close": 41050.0,
+  "change_pct": 7.04,
+  "volume": 731095,
+  "code": "302440",
+  "name": "SK바이오사이언스",
+  "market": "KOSPI",
+  "chart": "charts/302440_2026-11-09.json",
+  "notified": true,
+  "vs": {
+   "KOSPI": {
+    "v": "강함",
+    "idx_pct": 1.02
+   },
+   "KOSDAQ": {
+    "v": "보통",
+    "idx_pct": 1.58
+   }
+  }
+ },
+ {
   "signal_date": "2026-11-05",
   "cross_date": "2026-05-20",
   "window_end": "",
