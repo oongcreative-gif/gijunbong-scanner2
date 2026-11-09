@@ -25,6 +25,31 @@
   }
  },
  {
+  "signal_date": "2026-11-09",
+  "cross_date": "2026-07-07",
+  "window_end": "",
+  "day_no": 126,
+  "bar_no": 84,
+  "close": 1617.0,
+  "change_pct": 3.92,
+  "volume": 6330859,
+  "code": "298690",
+  "name": "에어부산",
+  "market": "KOSPI",
+  "chart": "charts/298690_2026-11-09.json",
+  "notified": true,
+  "vs": {
+   "KOSPI": {
+    "v": "강함",
+    "idx_pct": 1.02
+   },
+   "KOSDAQ": {
+    "v": "보통",
+    "idx_pct": 1.58
+   }
+  }
+ },
+ {
   "signal_date": "2026-11-05",
   "cross_date": "2026-05-20",
   "window_end": "",
