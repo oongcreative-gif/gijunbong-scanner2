@@ -1,5 +1,5 @@
 {
- "updated_at": "2026-11-11T19:23:26+09:00",
+ "updated_at": "2026-11-11T20:55:31+09:00",
  "asof": "2026-11-11",
  "universe_size": 583,
  "signals": [
@@ -9,9 +9,9 @@
    "window_end": "",
    "day_no": 177,
    "bar_no": 119,
-   "close": 13430.0,
-   "change_pct": 10.08,
-   "volume": 334861,
+   "close": 13490.0,
+   "change_pct": 10.57,
+   "volume": 336087,
    "code": "494120",
    "name": "큐리오시스",
    "market": "KOSDAQ",
