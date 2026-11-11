@@ -1,5 +1,30 @@
 [
  {
+  "signal_date": "2026-11-11",
+  "cross_date": "2026-05-19",
+  "window_end": "",
+  "day_no": 177,
+  "bar_no": 119,
+  "close": 13430.0,
+  "change_pct": 10.08,
+  "volume": 334861,
+  "code": "494120",
+  "name": "큐리오시스",
+  "market": "KOSDAQ",
+  "chart": "charts/494120_2026-11-11.json",
+  "notified": true,
+  "vs": {
+   "KOSPI": {
+    "v": "보통",
+    "idx_pct": 2.04
+   },
+   "KOSDAQ": {
+    "v": "보통",
+    "idx_pct": 4.58
+   }
+  }
+ },
+ {
   "signal_date": "2026-11-10",
   "cross_date": "2026-06-11",
   "window_end": "",
