@@ -1,21 +1,21 @@
 {
- "updated_at": "2026-11-11T20:55:31+09:00",
- "asof": "2026-11-11",
- "universe_size": 583,
+ "updated_at": "2026-11-12T19:25:51+09:00",
+ "asof": "2026-11-12",
+ "universe_size": 625,
  "signals": [
   {
-   "signal_date": "2026-11-11",
-   "cross_date": "2026-05-19",
+   "signal_date": "2026-11-12",
+   "cross_date": "2025-11-20",
    "window_end": "",
-   "day_no": 177,
-   "bar_no": 119,
-   "close": 13490.0,
-   "change_pct": 10.57,
-   "volume": 336087,
-   "code": "494120",
-   "name": "큐리오시스",
-   "market": "KOSDAQ",
-   "chart": "charts/494120_2026-11-11.json"
+   "day_no": 358,
+   "bar_no": 239,
+   "close": 45150.0,
+   "change_pct": 8.53,
+   "volume": 6364827,
+   "code": "035900",
+   "name": "JYP Ent.",
+   "market": "KOSDAQ GLOBAL",
+   "chart": "charts/035900_2026-11-12.json"
   }
  ]
 }

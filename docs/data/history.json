@@ -1,5 +1,30 @@
 [
  {
+  "signal_date": "2026-11-12",
+  "cross_date": "2025-11-20",
+  "window_end": "",
+  "day_no": 358,
+  "bar_no": 239,
+  "close": 45150.0,
+  "change_pct": 8.53,
+  "volume": 6364827,
+  "code": "035900",
+  "name": "JYP Ent.",
+  "market": "KOSDAQ GLOBAL",
+  "chart": "charts/035900_2026-11-12.json",
+  "notified": true,
+  "vs": {
+   "KOSPI": {
+    "v": "보통",
+    "idx_pct": -1.3
+   },
+   "KOSDAQ": {
+    "v": "보통",
+    "idx_pct": -2.36
+   }
+  }
+ },
+ {
   "signal_date": "2026-11-11",
   "cross_date": "2026-05-19",
   "window_end": "",
