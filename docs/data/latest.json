@@ -1,21 +1,35 @@
 {
- "updated_at": "2026-11-12T20:57:54+09:00",
- "asof": "2026-11-12",
- "universe_size": 625,
+ "updated_at": "2026-11-13T19:24:08+09:00",
+ "asof": "2026-11-13",
+ "universe_size": 648,
  "signals": [
   {
-   "signal_date": "2026-11-12",
-   "cross_date": "2025-11-20",
+   "signal_date": "2026-11-13",
+   "cross_date": "2025-12-02",
    "window_end": "",
-   "day_no": 358,
-   "bar_no": 239,
-   "close": 45050.0,
-   "change_pct": 8.29,
-   "volume": 6445201,
-   "code": "035900",
-   "name": "JYP Ent.",
-   "market": "KOSDAQ GLOBAL",
-   "chart": "charts/035900_2026-11-12.json"
+   "day_no": 347,
+   "bar_no": 232,
+   "close": 3600.0,
+   "change_pct": 15.2,
+   "volume": 11370570,
+   "code": "104620",
+   "name": "노랑풍선",
+   "market": "KOSDAQ",
+   "chart": "charts/104620_2026-11-13.json"
+  },
+  {
+   "signal_date": "2026-11-13",
+   "cross_date": "2026-09-23",
+   "window_end": "",
+   "day_no": 52,
+   "bar_no": 34,
+   "close": 59500.0,
+   "change_pct": 1.88,
+   "volume": 134394,
+   "code": "192080",
+   "name": "더블유게임즈",
+   "market": "KOSPI",
+   "chart": "charts/192080_2026-11-13.json"
   }
  ]
 }

@@ -1,5 +1,55 @@
 [
  {
+  "signal_date": "2026-11-13",
+  "cross_date": "2025-12-02",
+  "window_end": "",
+  "day_no": 347,
+  "bar_no": 232,
+  "close": 3600.0,
+  "change_pct": 15.2,
+  "volume": 11370570,
+  "code": "104620",
+  "name": "노랑풍선",
+  "market": "KOSDAQ",
+  "chart": "charts/104620_2026-11-13.json",
+  "notified": true,
+  "vs": {
+   "KOSPI": {
+    "v": "보통",
+    "idx_pct": -0.51
+   },
+   "KOSDAQ": {
+    "v": "보통",
+    "idx_pct": 1.68
+   }
+  }
+ },
+ {
+  "signal_date": "2026-11-13",
+  "cross_date": "2026-09-23",
+  "window_end": "",
+  "day_no": 52,
+  "bar_no": 34,
+  "close": 59500.0,
+  "change_pct": 1.88,
+  "volume": 134394,
+  "code": "192080",
+  "name": "더블유게임즈",
+  "market": "KOSPI",
+  "chart": "charts/192080_2026-11-13.json",
+  "notified": true,
+  "vs": {
+   "KOSPI": {
+    "v": "보통",
+    "idx_pct": -0.51
+   },
+   "KOSDAQ": {
+    "v": "보통",
+    "idx_pct": 1.68
+   }
+  }
+ },
+ {
   "signal_date": "2026-11-12",
   "cross_date": "2025-11-20",
   "window_end": "",
