@@ -26,6 +26,31 @@
  },
  {
   "signal_date": "2026-11-13",
+  "cross_date": "2026-05-11",
+  "window_end": "",
+  "day_no": 187,
+  "bar_no": 127,
+  "close": 20900.0,
+  "change_pct": 3.21,
+  "volume": 262304,
+  "code": "376300",
+  "name": "디어유",
+  "market": "KOSDAQ",
+  "chart": "charts/376300_2026-11-13.json",
+  "notified": true,
+  "vs": {
+   "KOSPI": {
+    "v": "보통",
+    "idx_pct": -0.51
+   },
+   "KOSDAQ": {
+    "v": "보통",
+    "idx_pct": 1.68
+   }
+  }
+ },
+ {
+  "signal_date": "2026-11-13",
   "cross_date": "2026-09-23",
   "window_end": "",
   "day_no": 52,
