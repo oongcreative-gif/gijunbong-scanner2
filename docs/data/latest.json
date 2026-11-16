@@ -1,5 +1,5 @@
 {
- "updated_at": "2026-11-16T19:51:57+09:00",
+ "updated_at": "2026-11-16T21:07:54+09:00",
  "asof": "2026-11-16",
  "universe_size": 583,
  "signals": [
@@ -9,9 +9,9 @@
    "window_end": "",
    "day_no": 27,
    "bar_no": 19,
-   "close": 30700.0,
-   "change_pct": 13.49,
-   "volume": 60873,
+   "close": 30800.0,
+   "change_pct": 13.86,
+   "volume": 61287,
    "code": "192440",
    "name": "슈피겐코리아",
    "market": "KOSDAQ",
