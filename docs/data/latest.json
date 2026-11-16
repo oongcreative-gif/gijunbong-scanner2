@@ -1,49 +1,21 @@
 {
- "updated_at": "2026-11-13T20:54:57+09:00",
- "asof": "2026-11-13",
- "universe_size": 648,
+ "updated_at": "2026-11-16T19:51:57+09:00",
+ "asof": "2026-11-16",
+ "universe_size": 583,
  "signals": [
   {
-   "signal_date": "2026-11-13",
-   "cross_date": "2025-12-02",
+   "signal_date": "2026-11-16",
+   "cross_date": "2026-10-21",
    "window_end": "",
-   "day_no": 347,
-   "bar_no": 232,
-   "close": 3595.0,
-   "change_pct": 15.04,
-   "volume": 11457426,
-   "code": "104620",
-   "name": "노랑풍선",
+   "day_no": 27,
+   "bar_no": 19,
+   "close": 30700.0,
+   "change_pct": 13.49,
+   "volume": 60873,
+   "code": "192440",
+   "name": "슈피겐코리아",
    "market": "KOSDAQ",
-   "chart": "charts/104620_2026-11-13.json"
-  },
-  {
-   "signal_date": "2026-11-13",
-   "cross_date": "2026-05-11",
-   "window_end": "",
-   "day_no": 187,
-   "bar_no": 127,
-   "close": 20900.0,
-   "change_pct": 3.21,
-   "volume": 262304,
-   "code": "376300",
-   "name": "디어유",
-   "market": "KOSDAQ",
-   "chart": "charts/376300_2026-11-13.json"
-  },
-  {
-   "signal_date": "2026-11-13",
-   "cross_date": "2026-09-23",
-   "window_end": "",
-   "day_no": 52,
-   "bar_no": 34,
-   "close": 59500.0,
-   "change_pct": 1.88,
-   "volume": 134525,
-   "code": "192080",
-   "name": "더블유게임즈",
-   "market": "KOSPI",
-   "chart": "charts/192080_2026-11-13.json"
+   "chart": "charts/192440_2026-11-16.json"
   }
  ]
 }

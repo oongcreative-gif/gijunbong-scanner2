@@ -1,5 +1,30 @@
 [
  {
+  "signal_date": "2026-11-16",
+  "cross_date": "2026-10-21",
+  "window_end": "",
+  "day_no": 27,
+  "bar_no": 19,
+  "close": 30700.0,
+  "change_pct": 13.49,
+  "volume": 60873,
+  "code": "192440",
+  "name": "슈피겐코리아",
+  "market": "KOSDAQ",
+  "chart": "charts/192440_2026-11-16.json",
+  "notified": true,
+  "vs": {
+   "KOSPI": {
+    "v": "강함",
+    "idx_pct": -2.98
+   },
+   "KOSDAQ": {
+    "v": "강함",
+    "idx_pct": -3.68
+   }
+  }
+ },
+ {
   "signal_date": "2026-11-13",
   "cross_date": "2025-12-02",
   "window_end": "",
