@@ -1,21 +1,21 @@
 {
- "updated_at": "2026-11-16T21:07:54+09:00",
- "asof": "2026-11-16",
- "universe_size": 583,
+ "updated_at": "2026-11-17T19:28:24+09:00",
+ "asof": "2026-11-17",
+ "universe_size": 665,
  "signals": [
   {
-   "signal_date": "2026-11-16",
-   "cross_date": "2026-10-21",
+   "signal_date": "2026-11-17",
+   "cross_date": "2025-08-19",
    "window_end": "",
-   "day_no": 27,
-   "bar_no": 19,
-   "close": 30800.0,
-   "change_pct": 13.86,
-   "volume": 61287,
-   "code": "192440",
-   "name": "슈피겐코리아",
+   "day_no": 456,
+   "bar_no": 304,
+   "close": 6030.0,
+   "change_pct": 29.96,
+   "volume": 5289599,
+   "code": "446840",
+   "name": "지슨",
    "market": "KOSDAQ",
-   "chart": "charts/192440_2026-11-16.json"
+   "chart": "charts/446840_2026-11-17.json"
   }
  ]
 }

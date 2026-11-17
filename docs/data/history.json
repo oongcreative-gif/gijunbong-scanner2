@@ -1,5 +1,30 @@
 [
  {
+  "signal_date": "2026-11-17",
+  "cross_date": "2025-08-19",
+  "window_end": "",
+  "day_no": 456,
+  "bar_no": 304,
+  "close": 6030.0,
+  "change_pct": 29.96,
+  "volume": 5289599,
+  "code": "446840",
+  "name": "지슨",
+  "market": "KOSDAQ",
+  "chart": "charts/446840_2026-11-17.json",
+  "notified": true,
+  "vs": {
+   "KOSPI": {
+    "v": "강함",
+    "idx_pct": -2.75
+   },
+   "KOSDAQ": {
+    "v": "강함",
+    "idx_pct": -2.37
+   }
+  }
+ },
+ {
   "signal_date": "2026-11-16",
   "cross_date": "2026-10-21",
   "window_end": "",
