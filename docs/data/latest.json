@@ -1,5 +1,5 @@
 {
- "updated_at": "2026-11-17T19:28:24+09:00",
+ "updated_at": "2026-11-17T20:52:20+09:00",
  "asof": "2026-11-17",
  "universe_size": 665,
  "signals": [
@@ -11,7 +11,7 @@
    "bar_no": 304,
    "close": 6030.0,
    "change_pct": 29.96,
-   "volume": 5289599,
+   "volume": 5292180,
    "code": "446840",
    "name": "지슨",
    "market": "KOSDAQ",
