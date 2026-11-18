@@ -1,21 +1,35 @@
 {
- "updated_at": "2026-11-17T20:52:20+09:00",
- "asof": "2026-11-17",
- "universe_size": 665,
+ "updated_at": "2026-11-18T19:26:49+09:00",
+ "asof": "2026-11-18",
+ "universe_size": 634,
  "signals": [
   {
-   "signal_date": "2026-11-17",
-   "cross_date": "2025-08-19",
+   "signal_date": "2026-11-18",
+   "cross_date": "2026-04-17",
    "window_end": "",
-   "day_no": 456,
-   "bar_no": 304,
-   "close": 6030.0,
-   "change_pct": 29.96,
-   "volume": 5292180,
-   "code": "446840",
-   "name": "지슨",
-   "market": "KOSDAQ",
-   "chart": "charts/446840_2026-11-17.json"
+   "day_no": 216,
+   "bar_no": 144,
+   "close": 29000.0,
+   "change_pct": 29.75,
+   "volume": 1006118,
+   "code": "253450",
+   "name": "스튜디오드래곤",
+   "market": "KOSDAQ GLOBAL",
+   "chart": "charts/253450_2026-11-18.json"
+  },
+  {
+   "signal_date": "2026-11-18",
+   "cross_date": "2026-04-02",
+   "window_end": "",
+   "day_no": 231,
+   "bar_no": 155,
+   "close": 3690.0,
+   "change_pct": 25.3,
+   "volume": 9577556,
+   "code": "037270",
+   "name": "YG PLUS",
+   "market": "KOSPI",
+   "chart": "charts/037270_2026-11-18.json"
   }
  ]
 }
