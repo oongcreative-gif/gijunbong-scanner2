@@ -1,5 +1,30 @@
 [
  {
+  "signal_date": "2026-11-19",
+  "cross_date": "2026-05-04",
+  "window_end": "",
+  "day_no": 200,
+  "bar_no": 135,
+  "close": 186700.0,
+  "change_pct": 4.59,
+  "volume": 1820837,
+  "code": "352820",
+  "name": "하이브",
+  "market": "KOSPI",
+  "chart": "charts/352820_2026-11-19.json",
+  "notified": true,
+  "vs": {
+   "KOSPI": {
+    "v": "약함",
+    "idx_pct": -0.03
+   },
+   "KOSDAQ": {
+    "v": "약함",
+    "idx_pct": 0.5
+   }
+  }
+ },
+ {
   "signal_date": "2026-11-18",
   "cross_date": "2026-04-17",
   "window_end": "",
