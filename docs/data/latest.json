@@ -1,21 +1,6 @@
 {
- "updated_at": "2026-11-19T20:58:36+09:00",
- "asof": "2026-11-19",
- "universe_size": 570,
- "signals": [
-  {
-   "signal_date": "2026-11-19",
-   "cross_date": "2026-05-04",
-   "window_end": "",
-   "day_no": 200,
-   "bar_no": 135,
-   "close": 187200.0,
-   "change_pct": 4.87,
-   "volume": 1837224,
-   "code": "352820",
-   "name": "하이브",
-   "market": "KOSPI",
-   "chart": "charts/352820_2026-11-19.json"
-  }
- ]
+ "updated_at": "2026-11-20T19:27:10+09:00",
+ "asof": "2026-11-20",
+ "universe_size": 579,
+ "signals": []
 }
